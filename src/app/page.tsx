@@ -50,8 +50,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Dados em Tempo Real v1.2</span>
+        </div>
       </div>
 
       {/* Stats Overview */}
