@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 
 interface OrderActionsProps {
     status: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
-    onStatusChange: (newStatus: any) => void
+    onStatusChange: (newStatus: any, notes?: string, date?: Date) => void
 }
 
 export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
@@ -39,40 +39,32 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     }
 
     const confirmAction = () => {
-        // Mock logic
         if (actionType === "MIRROR") {
-            console.log("Mirror confirmed with date:", date)
-            onStatusChange("WAITING_ARRIVAL")
+            onStatusChange("WAITING_ARRIVAL", "Previsão de chegada definida", date)
         } else if (actionType === "RECEIVE") {
-            // Logic for complete
-            console.log("Received Complete")
-            onStatusChange("RECEIVED_COMPLETE")
+            onStatusChange("RECEIVED_COMPLETE", "Pedido recebido completo")
         } else if (actionType === "PARTIAL") {
-            console.log("Received Partial, new date:", date)
-            onStatusChange("RECEIVED_PARTIAL") // Or waiting arrival again? 
-            // System definition: "Se ficou saldo -> Recebido com Saldo -> Campo obrigatório: Nova data -> Status muda auto para Aguardando Chegada"
+            onStatusChange("RECEIVED_PARTIAL", "Recebido com saldo pendente", date)
         }
         setIsDialogOpen(false)
+        setDate(undefined)
     }
 
     const handlePartial = () => {
         setActionType("PARTIAL")
-        // Dialog remains open but content changes or we open a new one. 
-        // For simplicity, let's switch to partial input in the same dialog or separate flow.
-        // Re-using dialog state effectively.
     }
 
     return (
         <div className="flex gap-2">
             {status === "SENT" && (
-                <Button onClick={() => onStatusChange("APPROVED")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                <Button onClick={() => onStatusChange("APPROVED", "Pedido aprovado")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
                     <ThumbsUp className="mr-2 h-4 w-4" />
                     Aprovar Pedido
                 </Button>
             )}
 
             {status === "APPROVED" && (
-                <Button onClick={() => onStatusChange("MIRROR_ARRIVED")} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                <Button onClick={() => onStatusChange("MIRROR_ARRIVED", "Espelho do cliente chegou")} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
                     <FileCheck className="mr-2 h-4 w-4" />
                     Espelho do Cliente Chegou
                 </Button>
@@ -85,7 +77,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                 </Button>
             )}
 
-            {(status === "WAITING_ARRIVAL" || status === "RECEIVED_PARTIAL") && ( // RECEIVED_PARTIAL logic might be different if it loops back to WAITING
+            {(status === "WAITING_ARRIVAL" || status === "RECEIVED_PARTIAL") && (
                 <Button onClick={() => handleAction("RECEIVE")}>
                     <Truck className="mr-2 h-4 w-4" />
                     Receber Pedido
