@@ -23,7 +23,10 @@ export const dynamic = 'force-dynamic'
 export default async function DashboardPage() {
   // Fetch real data
   const allOrders = await db.query.orders.findMany({
-    where: not(eq(orders.status, 'RECEIVED_COMPLETE'))
+    where: not(eq(orders.status, 'RECEIVED_COMPLETE')),
+    with: {
+      supplier: true,
+    }
   })
 
   // Calculate Stats
