@@ -4,6 +4,8 @@ import { relations } from 'drizzle-orm';
 // Enums
 export const orderStatusEnum = pgEnum('order_status', [
   'SENT',              // Enviado ao Fornecedor
+  'APPROVED',          // Pedido Aprovado
+  'MIRROR_ARRIVED',    // Espelho do Cliente Chegou
   'WAITING_ARRIVAL',   // Aguardando Chegada
   'RECEIVED_COMPLETE', // Recebido Completo
   'RECEIVED_PARTIAL'   // Recebido com Saldo

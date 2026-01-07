@@ -13,8 +13,38 @@ import {
 } from "lucide-react"
 import { Overview } from "@/components/dashboard/Overview"
 import { RecentAlerts } from "@/components/dashboard/RecentAlerts"
+import { db } from "@/db"
+import { orders } from "@/db/schema"
+import { eq, not, or, and, lt, lte, gte } from "drizzle-orm"
+import { startOfDay, endOfDay } from "date-fns"
 
-export default function DashboardPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function DashboardPage() {
+  // Fetch real data
+  const allOrders = await db.query.orders.findMany({
+    where: not(eq(orders.status, 'RECEIVED_COMPLETE'))
+  })
+
+  // Calculate Stats
+  const totalOpenValue = allOrders.reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
+
+  const noMirrorCount = allOrders.filter(o =>
+    o.status === 'SENT' || o.status === 'APPROVED'
+  ).length
+
+  const today = new Date()
+  const arrivingTodayCount = allOrders.filter(o => {
+    if (!o.expectedArrivalDate) return false
+    const expected = new Date(o.expectedArrivalDate)
+    return expected >= startOfDay(today) && expected <= endOfDay(today)
+  }).length
+
+  const alertsCount = allOrders.filter(o => {
+    if (!o.expectedArrivalDate) return false
+    return new Date(o.expectedArrivalDate) < startOfDay(today)
+  }).length
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center">
@@ -29,9 +59,11 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 0,00</div>
+            <div className="text-2xl font-bold">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Pedidos enviador e não concluídos
+              Pedidos enviados e não concluídos
             </p>
           </CardContent>
         </Card>
@@ -41,7 +73,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{noMirrorCount}</div>
             <p className="text-xs text-muted-foreground">
               Aguardando confirmação
             </p>
@@ -53,7 +85,7 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{arrivingTodayCount}</div>
             <p className="text-xs text-muted-foreground">
               Previsão para hoje
             </p>
@@ -65,7 +97,7 @@ export default function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">0</div>
+            <div className="text-2xl font-bold text-destructive">{alertsCount}</div>
             <p className="text-xs text-muted-foreground">
               Pedidos atrasados ou com problemas
             </p>
@@ -80,7 +112,7 @@ export default function DashboardPage() {
             <CardTitle>Compras por Marca (Últimos 6 meses)</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            <Overview />
+            <Overview orders={allOrders} />
           </CardContent>
         </Card>
         <Card className="col-span-3 hover:shadow-md transition-shadow border-l-4 border-l-destructive/50">
@@ -91,7 +123,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RecentAlerts />
+            <RecentAlerts orders={allOrders} />
           </CardContent>
         </Card>
       </div>

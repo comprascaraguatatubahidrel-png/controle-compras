@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar as CalendarIcon, CheckCircle, Truck, AlertTriangle } from "lucide-react"
+import { Calendar as CalendarIcon, CheckCircle, Truck, AlertTriangle, ThumbsUp, FileCheck } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -24,8 +24,8 @@ import {
 import { cn } from "@/lib/utils"
 
 interface OrderActionsProps {
-    status: "SENT" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
-    onStatusChange: (newStatus: string) => void
+    status: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
+    onStatusChange: (newStatus: any) => void
 }
 
 export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
@@ -65,9 +65,23 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     return (
         <div className="flex gap-2">
             {status === "SENT" && (
+                <Button onClick={() => onStatusChange("APPROVED")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                    <ThumbsUp className="mr-2 h-4 w-4" />
+                    Aprovar Pedido
+                </Button>
+            )}
+
+            {status === "APPROVED" && (
+                <Button onClick={() => onStatusChange("MIRROR_ARRIVED")} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
+                    <FileCheck className="mr-2 h-4 w-4" />
+                    Espelho do Cliente Chegou
+                </Button>
+            )}
+
+            {status === "MIRROR_ARRIVED" && (
                 <Button onClick={() => handleAction("MIRROR")}>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Espelho Recebido
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    Informar Previsão
                 </Button>
             )}
 

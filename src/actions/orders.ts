@@ -48,9 +48,10 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     })
 
     revalidatePath("/orders")
+    revalidatePath("/")
 }
 
-export async function updateOrderStatus(id: number, newStatus: "SENT" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL", notes?: string, expectedDate?: Date) {
+export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL", notes?: string, expectedDate?: Date) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -78,4 +79,5 @@ export async function updateOrderStatus(id: number, newStatus: "SENT" | "WAITING
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+    revalidatePath("/")
 }
