@@ -19,7 +19,7 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "dropdown",
+  captionLayout = "label",
   buttonVariant = "ghost",
   formatters,
   components,
@@ -147,14 +147,14 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <ChevronLeftIcon className={cn("size-6 text-primary", className)} {...props} />
             )
           }
 
           if (orientation === "right") {
             return (
               <ChevronRightIcon
-                className={cn("size-4", className)}
+                className={cn("size-6 text-primary", className)}
                 {...props}
               />
             )
