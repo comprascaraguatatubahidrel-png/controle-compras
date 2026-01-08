@@ -10,7 +10,7 @@ import { getOrderById, updateOrderStatus } from "@/actions/orders"
 
 const statusMap: Record<string, { label: string; className: string }> = {
     SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800" },
-    APPROVED: { label: "Pedido Aprovado", className: "bg-green-100 text-green-800" },
+    APPROVED: { label: "Orçamento Aprovado", className: "bg-green-100 text-green-800" },
     MIRROR_ARRIVED: { label: "Espelho Chegou", className: "bg-indigo-100 text-indigo-800" },
     WAITING_ARRIVAL: { label: "Aguardando Chegada", className: "bg-yellow-100 text-yellow-800" },
     RECEIVED_COMPLETE: { label: "Recebido Completo", className: "bg-green-100 text-green-800" },
@@ -100,7 +100,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                             {order.history.map((item: any, index: number) => (
                                 <div key={index} className="relative">
                                     <span className="absolute -left-[21px] top-1 h-3 w-3 rounded-full bg-primary" />
-                                    <p className="text-sm font-medium">{item.newStatus}</p>
+                                    <p className="text-sm font-medium">{statusMap[item.newStatus]?.label || item.newStatus}</p>
                                     <p className="text-sm text-muted-foreground">{item.notes}</p>
                                     <p className="text-xs text-muted-foreground mt-1">{item.changeDate.toLocaleString()}</p>
                                 </div>

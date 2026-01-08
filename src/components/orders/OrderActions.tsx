@@ -57,23 +57,9 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     return (
         <div className="flex gap-2">
             {status === "SENT" && (
-                <Button onClick={() => onStatusChange("APPROVED", "Pedido aprovado")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                <Button onClick={() => handleAction("MIRROR")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
                     <ThumbsUp className="mr-2 h-4 w-4" />
-                    Aprovar Pedido
-                </Button>
-            )}
-
-            {status === "APPROVED" && (
-                <Button onClick={() => onStatusChange("MIRROR_ARRIVED", "Espelho do cliente chegou")} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
-                    <FileCheck className="mr-2 h-4 w-4" />
-                    Espelho do Cliente Chegou
-                </Button>
-            )}
-
-            {status === "MIRROR_ARRIVED" && (
-                <Button onClick={() => handleAction("MIRROR")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    Informar Previsão
+                    Aprovar Orçamento
                 </Button>
             )}
 

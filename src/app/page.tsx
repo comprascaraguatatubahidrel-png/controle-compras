@@ -32,9 +32,9 @@ export default async function DashboardPage() {
   // Calculate Stats
   const totalOpenValue = allOrders.reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
 
-  const noMirrorCount = allOrders.filter(o =>
-    o.status === 'SENT' || o.status === 'APPROVED'
-  ).length
+  const noMirrorCount = allOrders.filter(o => o.status === 'SENT').length
+
+  const partialCount = allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length
 
   const today = new Date()
   const arrivingTodayCount = allOrders.filter(o => {
@@ -44,6 +44,14 @@ export default async function DashboardPage() {
   }).length
 
   const alertsCount = allOrders.filter(o => {
+    // Alert 1: Espelho atrasado (SENT > 2 days)
+    if (o.status === 'SENT') {
+      const twoDaysAgo = new Date()
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
+      if (o.sentDate < twoDaysAgo) return true
+    }
+
+    // Alert 2 & 3: Delayed arrival or overdue partial
     if (!o.expectedArrivalDate) return false
     return new Date(o.expectedArrivalDate) < startOfDay(today)
   }).length
@@ -60,7 +68,7 @@ export default async function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Card x-chunk="dashboard-01-chunk-0" className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total em Aberto</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -70,25 +78,25 @@ export default async function DashboardPage() {
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Pedidos enviados e não concluídos
+              Pedidos não concluídos
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-1" className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sem Espelho</CardTitle>
+            <CardTitle className="text-sm font-medium">Aguar. Espelho</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{noMirrorCount}</div>
             <p className="text-xs text-muted-foreground">
-              Aguardando confirmação
+              Aguardando aprovação
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-2" className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Chegam Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium">Cheg. Hoje</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -98,15 +106,15 @@ export default async function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-3" className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alertas</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-medium">Saldo Pendente</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{alertsCount}</div>
+            <div className="text-2xl font-bold text-orange-600">{partialCount}</div>
             <p className="text-xs text-muted-foreground">
-              Pedidos atrasados ou com problemas
+              Recebidos com saldo
             </p>
           </CardContent>
         </Card>
