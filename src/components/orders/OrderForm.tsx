@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
+import { Check, ChevronsUpDown, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -20,13 +20,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
@@ -36,9 +29,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { SupplierForm } from "@/components/suppliers/SupplierForm"
 import { createOrder } from "@/actions/orders"
 import { getSuppliers, createSupplier } from "@/actions/suppliers"
+import { cn } from "@/lib/utils"
 
 const orderSchema = z.object({
   code: z.string().min(1, "Código do pedido é obrigatório."),
@@ -53,7 +56,8 @@ export function OrderForm() {
   const router = useRouter()
   const [suppliers, setSuppliers] = useState<{ id: number, name: string }[]>([])
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false) // loading for submit
+  const [isLoading, setIsLoading] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderSchema),
@@ -66,20 +70,16 @@ export function OrderForm() {
   })
 
   useEffect(() => {
-    // Fetch suppliers on mount
     getSuppliers().then(data => {
       setSuppliers(data)
     })
   }, [])
 
-  // Handle new supplier creation from Modal
   const handleCreateSupplier = async (data: any) => {
     await createSupplier({ name: data.name })
     const updatedSuppliers = await getSuppliers()
     setSuppliers(updatedSuppliers)
 
-    // Auto-select the new supplier (find the one with highest ID roughly, or just created)
-    // Since we sort by CreatedAt desc in action, it should be first
     if (updatedSuppliers.length > 0) {
       form.setValue("supplierId", updatedSuppliers[0].id.toString())
     }
@@ -94,7 +94,6 @@ export function OrderForm() {
       router.push("/orders")
     } catch (error) {
       console.error("Failed to create order", error)
-      // could allow error handling here
     } finally {
       setIsLoading(false)
     }
@@ -110,7 +109,6 @@ export function OrderForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Pedido System Code */}
               <FormField
                 control={form.control}
                 name="code"
@@ -125,26 +123,65 @@ export function OrderForm() {
                 )}
               />
 
-              {/* Supplier Select with Quick Add */}
               <FormField
                 control={form.control}
                 name="supplierId"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Fornecedor</FormLabel>
                     <div className="flex gap-2">
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {suppliers.map((s) => (
-                            <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={open}
+                              className={cn(
+                                "flex-1 justify-between font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? suppliers.find(
+                                  (s) => s.id.toString() === field.value
+                                )?.name
+                                : "Selecione..."}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar fornecedor..." />
+                            <CommandList>
+                              <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
+                              <CommandGroup>
+                                {suppliers.map((s) => (
+                                  <CommandItem
+                                    key={s.id}
+                                    value={s.name}
+                                    onSelect={() => {
+                                      form.setValue("supplierId", s.id.toString())
+                                      setOpen(false)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        s.id.toString() === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {s.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
 
                       <Dialog open={isSupplierDialogOpen} onOpenChange={setIsSupplierDialogOpen}>
                         <DialogTrigger asChild>
@@ -169,7 +206,6 @@ export function OrderForm() {
               />
             </div>
 
-            {/* Value */}
             <FormField
               control={form.control}
               name="totalValue"
@@ -190,7 +226,6 @@ export function OrderForm() {
               )}
             />
 
-            {/* Observations */}
             <FormField
               control={form.control}
               name="observations"
@@ -223,4 +258,3 @@ export function OrderForm() {
     </Card>
   )
 }
-
