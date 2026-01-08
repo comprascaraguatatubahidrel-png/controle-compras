@@ -3,10 +3,14 @@
 import { db } from "@/db"
 import { orders, orderHistory, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, or, ilike } from "drizzle-orm"
 
-export async function getOrders() {
+export async function getOrders(search?: string) {
     return await db.query.orders.findMany({
+        where: search ? or(
+            ilike(orders.code, `%${search}%`),
+            ilike(suppliers.name, `%${search}%`)
+        ) : undefined,
         with: {
             supplier: true,
         },

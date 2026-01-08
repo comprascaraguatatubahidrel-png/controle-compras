@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getOrders } from "@/actions/orders"
+import { OrderSearch } from "@/components/orders/OrderSearch"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 hover:bg-blue-100" },
@@ -30,8 +31,9 @@ const statusMap: Record<string, { label: string; className: string }> = {
   RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-orange-100 text-orange-800 hover:bg-orange-100" },
 }
 
-export default async function OrdersPage() {
-  const orders = await getOrders()
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
+  const orders = await getOrders(q)
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,14 +47,7 @@ export default async function OrdersPage() {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar por código ou fornecedor..."
-            className="w-full pl-8 md:w-[300px] lg:w-[400px]"
-          />
-        </div>
+        <OrderSearch />
         <Button variant="outline" size="icon">
           <Filter className="h-4 w-4" />
         </Button>
