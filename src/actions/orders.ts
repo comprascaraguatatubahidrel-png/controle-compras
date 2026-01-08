@@ -6,11 +6,38 @@ import { revalidatePath } from "next/cache"
 import { eq, desc, or, ilike } from "drizzle-orm"
 
 export async function getOrders(search?: string) {
+    if (search) {
+        return await db.select({
+            id: orders.id,
+            code: orders.code,
+            supplierId: orders.supplierId,
+            totalValue: orders.totalValue,
+            status: orders.status,
+            sentDate: orders.sentDate,
+            expectedArrivalDate: orders.expectedArrivalDate,
+            observations: orders.observations,
+            lastUpdate: orders.lastUpdate,
+            supplier: {
+                id: suppliers.id,
+                name: suppliers.name,
+                brand: suppliers.brand,
+                observations: suppliers.observations,
+                createdAt: suppliers.createdAt,
+                updatedAt: suppliers.updatedAt,
+            }
+        })
+            .from(orders)
+            .innerJoin(suppliers, eq(orders.supplierId, suppliers.id))
+            .where(
+                or(
+                    ilike(orders.code, `%${search}%`),
+                    ilike(suppliers.name, `%${search}%`)
+                )
+            )
+            .orderBy(desc(orders.sentDate))
+    }
+
     return await db.query.orders.findMany({
-        where: search ? or(
-            ilike(orders.code, `%${search}%`),
-            ilike(suppliers.name, `%${search}%`)
-        ) : undefined,
         with: {
             supplier: true,
         },
