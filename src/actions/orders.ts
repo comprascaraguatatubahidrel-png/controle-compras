@@ -3,41 +3,42 @@
 import { db } from "@/db"
 import { orders, orderHistory, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc, or, ilike } from "drizzle-orm"
+import { eq, desc, or, ilike, and, gte, lte, not } from "drizzle-orm"
+import { startOfDay, endOfDay } from "date-fns"
 
-export async function getOrders(search?: string) {
+export async function getOrders(search?: string, status?: string, filter?: string) {
+    const today = new Date()
+    let whereClause: any[] = []
+
     if (search) {
-        return await db.select({
-            id: orders.id,
-            code: orders.code,
-            supplierId: orders.supplierId,
-            totalValue: orders.totalValue,
-            status: orders.status,
-            sentDate: orders.sentDate,
-            expectedArrivalDate: orders.expectedArrivalDate,
-            observations: orders.observations,
-            lastUpdate: orders.lastUpdate,
-            supplier: {
-                id: suppliers.id,
-                name: suppliers.name,
-                brand: suppliers.brand,
-                observations: suppliers.observations,
-                createdAt: suppliers.createdAt,
-                updatedAt: suppliers.updatedAt,
-            }
-        })
-            .from(orders)
-            .innerJoin(suppliers, eq(orders.supplierId, suppliers.id))
-            .where(
-                or(
-                    ilike(orders.code, `%${search}%`),
-                    ilike(suppliers.name, `%${search}%`)
-                )
+        whereClause.push(
+            or(
+                ilike(orders.code, `%${search}%`),
+                ilike(suppliers.name, `%${search}%`)
             )
-            .orderBy(desc(orders.sentDate))
+        )
+    }
+
+    if (status) {
+        whereClause.push(eq(orders.status, status as any))
+    }
+
+    if (filter === 'arriving_today') {
+        whereClause.push(
+            and(
+                gte(orders.expectedArrivalDate, startOfDay(today)),
+                lte(orders.expectedArrivalDate, endOfDay(today))
+            )
+        )
+    }
+
+    // Default: exclude RECEIVED_COMPLETE unless explicitly filtered
+    if (!status && !filter && !search) {
+        whereClause.push(not(eq(orders.status, 'RECEIVED_COMPLETE')))
     }
 
     return await db.query.orders.findMany({
+        where: whereClause.length > 0 ? and(...whereClause) : undefined,
         with: {
             supplier: true,
         },

@@ -17,6 +17,7 @@ import { db } from "@/db"
 import { orders } from "@/db/schema"
 import { eq, not, or, and, lt, lte, gte } from "drizzle-orm"
 import { startOfDay, endOfDay } from "date-fns"
+import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
 
@@ -68,56 +69,64 @@ export default async function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total em Aberto</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Pedidos não concluídos
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aguar. Espelho</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{noMirrorCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Aguardando aprovação
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cheg. Hoje</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{arrivingTodayCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Previsão para hoje
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Pendente</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{partialCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Recebidos com saldo
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/orders" className="block">
+          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total em Aberto</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Pedidos não concluídos
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/orders?status=SENT" className="block">
+          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Aguar. Espelho</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{noMirrorCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Aguardando aprovação
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/orders?filter=arriving_today" className="block">
+          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Cheg. Hoje</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{arrivingTodayCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Previsão para hoje
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/orders?status=RECEIVED_PARTIAL" className="block">
+          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Saldo Pendente</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{partialCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Recebidos com saldo
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Alerts Section (Active) */}

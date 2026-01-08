@@ -31,9 +31,9 @@ const statusMap: Record<string, { label: string; className: string }> = {
   RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-orange-100 text-orange-800 hover:bg-orange-100" },
 }
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { q } = await searchParams
-  const orders = await getOrders(q)
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string }> }) {
+  const { q, status, filter } = await searchParams
+  const orders = await getOrders(q, status, filter)
 
   return (
     <div className="flex flex-col gap-6">
