@@ -111,7 +111,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                                             {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
+                                    <PopoverContent className="w-auto p-0" align="center" side="bottom" sideOffset={4}>
                                         <Calendar
                                             mode="single"
                                             selected={date}
