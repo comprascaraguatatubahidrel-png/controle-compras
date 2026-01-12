@@ -1,4 +1,5 @@
-import { AlertTriangle, Clock } from "lucide-react"
+import { AlertTriangle, ArrowRight, Clock } from "lucide-react"
+import Link from "next/link"
 
 interface RecentAlertsProps {
     orders: any[]
@@ -44,11 +45,22 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                 const isPartial = order.status === 'RECEIVED_PARTIAL'
 
                 let title = "Pedido Atrasado"
-                if (isMirrorDelay) title = "Espelho Atrasado"
-                if (isPartial) title = "Saldo Pendente"
+                let actionText = "Estender Prazo"
+                if (isMirrorDelay) {
+                    title = "Espelho Atrasado"
+                    actionText = "Aprovar Orçamento"
+                }
+                if (isPartial) {
+                    title = "Saldo Pendente"
+                    actionText = "Ver Pedido"
+                }
 
                 return (
-                    <div key={order.id} className="flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-destructive bg-muted/40">
+                    <Link
+                        key={order.id}
+                        href={`/orders/${order.id}`}
+                        className="group flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-destructive bg-muted/40 hover:bg-destructive/10 hover:border-destructive transition-all cursor-pointer"
+                    >
                         <AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" />
                         <div className="flex-1 space-y-1">
                             <p className="text-sm font-medium leading-none">
@@ -58,25 +70,37 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                                 R$ {order.totalValue}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                Pedido #{order.code} ({order.supplier?.brand || "S/M"}).
+                                Pedido #{order.code} ({order.supplier?.brand || "S/M"})
                             </p>
                         </div>
-                    </div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-destructive group-hover:underline">
+                            {actionText}
+                            <ArrowRight className="h-3 w-3" />
+                        </div>
+                    </Link>
                 )
             })}
 
             {arrivingToday.map((order) => (
-                <div key={order.id} className="flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-yellow-500 bg-muted/40">
+                <Link
+                    key={order.id}
+                    href={`/orders/${order.id}`}
+                    className="group flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-yellow-500 bg-muted/40 hover:bg-yellow-50 hover:border-yellow-500 transition-all cursor-pointer"
+                >
                     <Clock className="mt-0.5 h-5 w-5 text-yellow-600" />
                     <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium leading-none">
                             Chegada Prevista Hoje
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Pedido #{order.code} ({order.supplier?.brand || "S/M"}).
+                            Pedido #{order.code} ({order.supplier?.brand || "S/M"})
                         </p>
                     </div>
-                </div>
+                    <div className="flex items-center gap-1 text-xs font-medium text-yellow-600 group-hover:underline">
+                        Ver Pedido
+                        <ArrowRight className="h-3 w-3" />
+                    </div>
+                </Link>
             ))}
         </div>
     )
