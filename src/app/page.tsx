@@ -11,7 +11,6 @@ import {
   DollarSign,
   Package,
 } from "lucide-react"
-import { Overview } from "@/components/dashboard/Overview"
 import { RecentAlerts } from "@/components/dashboard/RecentAlerts"
 import { db } from "@/db"
 import { orders } from "@/db/schema"
@@ -129,28 +128,18 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Alerts Section (Active) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle>Compras por Marca (Últimos 6 meses)</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <Overview orders={allOrders} />
-          </CardContent>
-        </Card>
-        <Card className="col-span-3 hover:shadow-md transition-shadow border-l-4 border-l-destructive/50">
-          <CardHeader>
-            <CardTitle>Alertas Críticos</CardTitle>
-            <CardDescription>
-              Pedidos precisando de atenção imediata.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentAlerts orders={allOrders} />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Alerts Section */}
+      <Card className="hover:shadow-md transition-shadow border-l-4 border-l-destructive/50">
+        <CardHeader>
+          <CardTitle>Alertas Críticos</CardTitle>
+          <CardDescription>
+            Pedidos precisando de atenção imediata.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RecentAlerts orders={allOrders} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
