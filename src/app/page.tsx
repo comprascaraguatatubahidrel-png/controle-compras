@@ -12,6 +12,7 @@ import {
   Package,
 } from "lucide-react"
 import { RecentAlerts } from "@/components/dashboard/RecentAlerts"
+import { TopSuppliers } from "@/components/dashboard/TopSuppliers"
 import { db } from "@/db"
 import { orders } from "@/db/schema"
 import { eq, not, or, and, lt, lte, gte } from "drizzle-orm"
@@ -128,18 +129,25 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Alerts Section */}
-      <Card className="hover:shadow-md transition-shadow border-l-4 border-l-destructive/50">
-        <CardHeader>
-          <CardTitle>Alertas Críticos</CardTitle>
-          <CardDescription>
-            Pedidos precisando de atenção imediata.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RecentAlerts orders={allOrders} />
-        </CardContent>
-      </Card>
+      {/* Alerts & Top Suppliers Section */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <Card className="hover:shadow-md transition-shadow border-l-4 border-l-destructive/50 h-full">
+            <CardHeader>
+              <CardTitle>Alertas Críticos</CardTitle>
+              <CardDescription>
+                Pedidos precisando de atenção imediata.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentAlerts orders={allOrders} />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="col-span-3">
+          <TopSuppliers orders={allOrders} />
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { ArrowLeft, Calendar, FileText, Truck } from "lucide-react"
+import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -9,12 +10,12 @@ import { OrderActions } from "@/components/orders/OrderActions"
 import { getOrderById, updateOrderStatus } from "@/actions/orders"
 
 const statusMap: Record<string, { label: string; className: string }> = {
-    SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800" },
-    APPROVED: { label: "Orçamento Aprovado", className: "bg-green-100 text-green-800" },
-    MIRROR_ARRIVED: { label: "Espelho Chegou", className: "bg-indigo-100 text-indigo-800" },
-    WAITING_ARRIVAL: { label: "Aguardando Chegada", className: "bg-yellow-100 text-yellow-800" },
-    RECEIVED_COMPLETE: { label: "Recebido Completo", className: "bg-green-100 text-green-800" },
-    RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-orange-100 text-orange-800" },
+    SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+    APPROVED: { label: "Orçamento Aprovado", className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },
+    MIRROR_ARRIVED: { label: "Espelho Chegou", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+    WAITING_ARRIVAL: { label: "Aguardando Chegada", className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
+    RECEIVED_COMPLETE: { label: "Recebido Completo", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" },
+    RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
 }
 
 // Wrapper for Client Component Logic (Actions)
@@ -48,6 +49,8 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     </div>
                     <p className="text-muted-foreground">{order.supplier.name}</p>
                 </div>
+
+                <OrderPrintButton />
 
                 {/* Actions Component */}
                 <OrderActionsWrapper orderId={order.id} currentStatus={order.status} />
