@@ -1,23 +1,14 @@
 'use server'
 
 import { db } from "@/db"
-import { orders, orderHistory, suppliers } from "@/db/schema"
+import { orders, orderHistory } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc, or, ilike, and, gte, lte, not } from "drizzle-orm"
+import { eq, desc, and, gte, lte, not } from "drizzle-orm"
 import { startOfDay, endOfDay } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string) {
     const today = new Date()
     let whereClause: any[] = []
-
-    if (search) {
-        whereClause.push(
-            or(
-                ilike(orders.code, `%${search}%`),
-                ilike(suppliers.name, `%${search}%`)
-            )
-        )
-    }
 
     if (status) {
         whereClause.push(eq(orders.status, status as any))
@@ -37,13 +28,25 @@ export async function getOrders(search?: string, status?: string, filter?: strin
         whereClause.push(not(eq(orders.status, 'RECEIVED_COMPLETE')))
     }
 
-    return await db.query.orders.findMany({
+    // Fetch orders with supplier relationship
+    const results = await db.query.orders.findMany({
         where: whereClause.length > 0 ? and(...whereClause) : undefined,
         with: {
             supplier: true,
         },
-        orderBy: [desc(orders.sentDate)],
+        orderBy: [desc(orders.sentDate)]
     })
+
+    // If there's a search query, filter by code or supplier name
+    if (search) {
+        const searchLower = search.toLowerCase()
+        return results.filter(order =>
+            order.code.toLowerCase().includes(searchLower) ||
+            order.supplier.name.toLowerCase().includes(searchLower)
+        )
+    }
+
+    return results
 }
 
 export async function getOrderById(id: number | string) {
