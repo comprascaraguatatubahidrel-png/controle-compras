@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar as CalendarIcon, CheckCircle, Truck, AlertTriangle, ThumbsUp, FileCheck } from "lucide-react"
+import { CheckCircle, Truck, AlertTriangle, ThumbsUp } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -13,15 +13,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
 
 interface OrderActionsProps {
     status: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
@@ -98,28 +91,19 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                         <div className="py-4">
                             <div className="flex flex-col gap-2">
                                 <span className="text-sm font-medium">Data Prevista</span>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-[240px] justify-start text-left font-normal",
-                                                !date && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="center" side="bottom" sideOffset={4}>
-                                        <Calendar
-                                            mode="single"
-                                            selected={date}
-                                            onSelect={setDate}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                {date && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Selecionado: {format(date, "PPP", { locale: ptBR })}
+                                    </p>
+                                )}
+                                <div className="flex justify-center border rounded-md p-2">
+                                    <Calendar
+                                        mode="single"
+                                        selected={date}
+                                        onSelect={setDate}
+                                        initialFocus
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}
