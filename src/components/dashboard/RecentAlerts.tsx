@@ -69,9 +69,14 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                             <p className="text-sm text-muted-foreground font-semibold">
                                 R$ {order.totalValue}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                                Pedido #{order.code} <span className="mx-1 text-muted-foreground/60">•</span> <span className="font-bold text-foreground">{order.supplier?.brand || "S/M"}</span>
-                            </p>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-foreground uppercase tracking-tight">
+                                    {order.supplier?.brand || "S/M"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    PEDIDO #{order.code}
+                                </span>
+                            </div>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-medium text-destructive group-hover:underline">
                             {actionText}
@@ -92,9 +97,14 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                         <p className="text-sm font-medium leading-none">
                             Chegada Prevista Hoje
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                            Pedido #{order.code} <span className="mx-1 text-muted-foreground/60">•</span> <span className="font-bold text-foreground">{order.supplier?.brand || "S/M"}</span>
-                        </p>
+                        <div className="flex flex-col">
+                            <span className="text-sm font-bold text-foreground uppercase tracking-tight">
+                                {order.supplier?.brand || "S/M"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                PEDIDO #{order.code}
+                            </span>
+                        </div>
                     </div>
                     <div className="flex items-center gap-1 text-xs font-medium text-yellow-600 group-hover:underline">
                         Ver Pedido
