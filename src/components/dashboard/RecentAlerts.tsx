@@ -70,7 +70,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                                 R$ {order.totalValue}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                Pedido #{order.code} ({order.supplier?.brand || "S/M"})
+                                Pedido #{order.code} <span className="mx-1 text-muted-foreground/60">•</span> <span className="font-bold text-foreground">{order.supplier?.brand || "S/M"}</span>
                             </p>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-medium text-destructive group-hover:underline">
@@ -93,7 +93,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                             Chegada Prevista Hoje
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Pedido #{order.code} ({order.supplier?.brand || "S/M"})
+                            Pedido #{order.code} <span className="mx-1 text-muted-foreground/60">•</span> <span className="font-bold text-foreground">{order.supplier?.brand || "S/M"}</span>
                         </p>
                     </div>
                     <div className="flex items-center gap-1 text-xs font-medium text-yellow-600 group-hover:underline">
