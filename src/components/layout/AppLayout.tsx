@@ -7,6 +7,7 @@ import {
     SheetContent,
     SheetTrigger,
 } from "@/components/ui/sheet"
+import { ModeToggle } from "@/components/mode-toggle"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -108,6 +109,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Sheet>
                     <div className="w-full flex-1">
                     </div>
+                    <ModeToggle />
                     <Button variant="secondary" size="icon" className="rounded-full">
                         <div className="h-5 w-5 rounded-full bg-primary" />
                         <span className="sr-only">Toggle user menu</span>
