@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Search, Plus, Filter, MoreHorizontal, AlertTriangle } from "lucide-react"
+import { Search, Plus, MoreHorizontal, AlertTriangle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getOrders } from "@/actions/orders"
+import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
+import { OrderFilters } from "@/components/orders/OrderFilters"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -31,9 +33,10 @@ const statusMap: Record<string, { label: string; className: string }> = {
   RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400" },
 }
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string }> }) {
-  const { q, status, filter } = await searchParams
-  const orders = await getOrders(q, status, filter)
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string, supplierId?: string, date?: string }> }) {
+  const { q, status, filter, supplierId, date } = await searchParams
+  const orders = await getOrders(q, status, filter, supplierId, date)
+  const suppliers = await getSuppliers()
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,9 +51,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
       <div className="flex items-center gap-4">
         <OrderSearch />
-        <Button variant="outline" size="icon">
-          <Filter className="h-4 w-4" />
-        </Button>
+        <OrderFilters suppliers={suppliers} />
       </div>
 
       <div className="rounded-md border">

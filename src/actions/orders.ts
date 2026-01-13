@@ -6,12 +6,26 @@ import { revalidatePath } from "next/cache"
 import { eq, desc, and, gte, lte, not } from "drizzle-orm"
 import { startOfDay, endOfDay } from "date-fns"
 
-export async function getOrders(search?: string, status?: string, filter?: string) {
+export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
     let whereClause: any[] = []
 
-    if (status) {
+    if (status && status !== 'ALL') {
         whereClause.push(eq(orders.status, status as any))
+    }
+
+    if (supplierId && supplierId !== 'ALL') {
+        whereClause.push(eq(orders.supplierId, parseInt(supplierId)))
+    }
+
+    if (date) {
+        const filterDate = new Date(date)
+        whereClause.push(
+            and(
+                gte(orders.expectedArrivalDate, startOfDay(filterDate)),
+                lte(orders.expectedArrivalDate, endOfDay(filterDate))
+            )
+        )
     }
 
     if (filter === 'arriving_today') {
@@ -24,7 +38,8 @@ export async function getOrders(search?: string, status?: string, filter?: strin
     }
 
     // Default: exclude RECEIVED_COMPLETE unless explicitly filtered
-    if (!status && !filter && !search) {
+    // Don't exclude if user is specifically filtering by something
+    if (!status && !filter && !search && !supplierId && !date) {
         whereClause.push(not(eq(orders.status, 'RECEIVED_COMPLETE')))
     }
 
