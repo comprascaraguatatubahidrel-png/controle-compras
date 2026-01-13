@@ -39,7 +39,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {alerts.map((order) => {
                 const isMirrorDelay = order.status === 'SENT' && (new Date(order.sentDate) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))
                 const isPartial = order.status === 'RECEIVED_PARTIAL'
@@ -59,29 +59,34 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                     <Link
                         key={order.id}
                         href={`/orders/${order.id}`}
-                        className="group flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-destructive bg-muted/40 hover:bg-destructive/10 hover:border-destructive transition-all cursor-pointer"
+                        className="group flex items-center gap-4 rounded-lg border p-3 border-l-4 border-l-red-500 bg-red-50/50 hover:bg-red-50 dark:bg-red-950/10 dark:hover:bg-red-950/20 transition-all cursor-pointer"
                     >
-                        <AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" />
-                        <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                                {title}
-                            </p>
-                            <p className="text-sm text-muted-foreground font-semibold">
-                                R$ {order.totalValue}
-                            </p>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-foreground uppercase tracking-tight">
+                        <div className="h-9 w-9 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-full flex items-center justify-center shrink-0">
+                            <AlertTriangle className="h-4 w-4" />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                                <p className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">
+                                    {title}
+                                </p>
+                                <span className="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
+                                    R$ {order.totalValue}
+                                </span>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight truncate">
                                     {order.supplier?.brand || "S/M"}
                                 </span>
+                                <span className="hidden sm:inline text-[10px] text-muted-foreground">•</span>
                                 <span className="text-xs text-muted-foreground">
-                                    PEDIDO #{order.code}
+                                    #{order.code}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 text-xs font-medium text-destructive group-hover:underline">
-                            {actionText}
-                            <ArrowRight className="h-3 w-3" />
-                        </div>
+
+                        <ArrowRight className="h-4 w-4 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
                     </Link>
                 )
             })}
@@ -90,26 +95,30 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                 <Link
                     key={order.id}
                     href={`/orders/${order.id}`}
-                    className="group flex items-start gap-4 rounded-md border p-3 border-l-4 border-l-yellow-500 bg-muted/40 hover:bg-yellow-50 hover:border-yellow-500 transition-all cursor-pointer"
+                    className="group flex items-center gap-4 rounded-lg border p-3 border-l-4 border-l-yellow-500 bg-yellow-50/50 hover:bg-yellow-50 dark:bg-yellow-950/10 dark:hover:bg-yellow-950/20 transition-all cursor-pointer"
                 >
-                    <Clock className="mt-0.5 h-5 w-5 text-yellow-600" />
-                    <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                            Chegada Prevista Hoje
-                        </p>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-bold text-foreground uppercase tracking-tight">
+                    <div className="h-9 w-9 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full flex items-center justify-center shrink-0">
+                        <Clock className="h-4 w-4" />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-300 truncate">
+                                Chegada Hoje
+                            </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                            <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight truncate">
                                 {order.supplier?.brand || "S/M"}
                             </span>
+                            <span className="hidden sm:inline text-[10px] text-muted-foreground">•</span>
                             <span className="text-xs text-muted-foreground">
-                                PEDIDO #{order.code}
+                                #{order.code}
                             </span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-medium text-yellow-600 group-hover:underline">
-                        Ver Pedido
-                        <ArrowRight className="h-3 w-3" />
-                    </div>
+
+                    <ArrowRight className="h-4 w-4 text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
                 </Link>
             ))}
         </div>

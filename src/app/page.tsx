@@ -69,59 +69,88 @@ export default async function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Link href="/orders" className="block">
-          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+        <Link href="/orders" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-emerald-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50/50 dark:from-zinc-950 dark:to-emerald-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <DollarSign className="h-12 w-12 text-emerald-500" />
+            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total em Aberto</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Total em Aberto</CardTitle>
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold truncate tracking-tight text-emerald-950 dark:text-emerald-50" title={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}>
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70 mt-1 font-medium">
                 Pedidos não concluídos
               </p>
             </CardContent>
           </Card>
         </Link>
-        <Link href="/orders?status=SENT" className="block">
-          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+
+        <Link href="/orders?status=SENT" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-blue-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/50 dark:from-zinc-950 dark:to-blue-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Clock className="h-12 w-12 text-blue-500" />
+            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Aguar. Espelho</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">Aguar. Espelho</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{noMirrorCount}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold truncate tracking-tight text-blue-950 dark:text-blue-50">
+                {noMirrorCount}
+              </div>
+              <p className="text-xs text-blue-600/80 dark:text-blue-400/70 mt-1 font-medium">
                 Aguardando aprovação
               </p>
             </CardContent>
           </Card>
         </Link>
-        <Link href="/orders?filter=arriving_today" className="block">
-          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+
+        <Link href="/orders?filter=arriving_today" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-purple-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-purple-500 bg-gradient-to-br from-white to-purple-50/50 dark:from-zinc-950 dark:to-purple-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Package className="h-12 w-12 text-purple-500" />
+            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cheg. Hoje</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">Cheg. Hoje</CardTitle>
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{arrivingTodayCount}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold truncate tracking-tight text-purple-950 dark:text-purple-50">
+                {arrivingTodayCount}
+              </div>
+              <p className="text-xs text-purple-600/80 dark:text-purple-400/70 mt-1 font-medium">
                 Previsão para hoje
               </p>
             </CardContent>
           </Card>
         </Link>
-        <Link href="/orders?status=RECEIVED_PARTIAL" className="block">
-          <Card className="hover:shadow-md transition-shadow hover:border-primary/50 cursor-pointer">
+
+        <Link href="/orders?status=RECEIVED_PARTIAL" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-amber-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-amber-500 bg-gradient-to-br from-white to-amber-50/50 dark:from-zinc-950 dark:to-amber-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <AlertTriangle className="h-12 w-12 text-amber-500" />
+            </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saldo Pendente</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
+              <CardTitle className="text-sm font-medium text-amber-700 dark:text-amber-400">Saldo Pendente</CardTitle>
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{partialCount}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold truncate tracking-tight text-amber-950 dark:text-amber-50">
+                {partialCount}
+              </div>
+              <p className="text-xs text-amber-600/80 dark:text-amber-400/70 mt-1 font-medium">
                 Recebidos com saldo
               </p>
             </CardContent>
