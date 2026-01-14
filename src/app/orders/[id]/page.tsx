@@ -20,6 +20,7 @@ const statusMap: Record<string, { label: string; className: string }> = {
 
 // Wrapper for Client Component Logic (Actions)
 import { OrderActionsWrapper } from "@/components/orders/OrderActionsWrapper"
+import { OrderObservations } from "@/components/orders/OrderObservations"
 
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -84,12 +85,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                             </span>
                         </div>
 
-                        <div className="pt-2">
-                            <p className="font-medium mb-1">Observações</p>
-                            <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                                {order.observations || "Sem observações."}
-                            </p>
-                        </div>
+                        <OrderObservations orderId={order.id} initialObservations={order.observations} />
                     </CardContent>
                 </Card>
 
