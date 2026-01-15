@@ -66,22 +66,23 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                                <p className="text-sm font-semibold text-red-900 dark:text-red-300 truncate">
-                                    {title}
+                            <div className="flex flex-col gap-0.5 mb-1.5">
+                                <p className="text-sm font-bold text-red-900 dark:text-red-200 truncate leading-none">
+                                    {order.supplier?.brand || "Fornecedor S/M"}
                                 </p>
-                                <span className="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
-                                    R$ {order.totalValue}
-                                </span>
+                                <p className="text-xs font-semibold text-red-700 dark:text-red-400">
+                                    Pedido #{order.code}
+                                </p>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                                <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight truncate">
-                                    {order.supplier?.brand || "S/M"}
-                                </span>
-                                <span className="hidden sm:inline text-[10px] text-muted-foreground">•</span>
-                                <span className="text-xs text-muted-foreground">
-                                    #{order.code}
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                    <span className="text-xs font-medium text-foreground/80 tracking-tight truncate">
+                                        {title}
+                                    </span>
+                                </div>
+                                <span className="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded-full">
+                                    R$ {order.totalValue}
                                 </span>
                             </div>
                         </div>
@@ -102,18 +103,17 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-300 truncate">
-                                Chegada Hoje
+                        <div className="flex flex-col gap-0.5 mb-1.5">
+                            <p className="text-sm font-bold text-yellow-900 dark:text-yellow-200 truncate leading-none">
+                                {order.supplier?.brand || "Fornecedor S/M"}
+                            </p>
+                            <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">
+                                Pedido #{order.code}
                             </p>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                            <span className="text-xs font-bold text-foreground/80 uppercase tracking-tight truncate">
-                                {order.supplier?.brand || "S/M"}
-                            </span>
-                            <span className="hidden sm:inline text-[10px] text-muted-foreground">•</span>
-                            <span className="text-xs text-muted-foreground">
-                                #{order.code}
+                            <span className="text-xs font-medium text-foreground/80 tracking-tight truncate">
+                                Chegada Hoje
                             </span>
                         </div>
                     </div>
