@@ -68,10 +68,10 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                         <div className="flex-1 min-w-0">
                             <div className="flex flex-col gap-0.5 mb-1.5">
                                 <p className="text-sm font-bold text-red-900 dark:text-red-200 truncate leading-none">
-                                    {order.supplier?.brand || "Fornecedor S/M"}
+                                    {order.supplier?.brand || order.supplier?.name || "Fornecedor S/M"}
                                 </p>
                                 <p className="text-xs font-semibold text-red-700 dark:text-red-400">
-                                    Pedido #{order.code}
+                                    Pedido {order.code}
                                 </p>
                             </div>
 
@@ -105,10 +105,10 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-col gap-0.5 mb-1.5">
                             <p className="text-sm font-bold text-yellow-900 dark:text-yellow-200 truncate leading-none">
-                                {order.supplier?.brand || "Fornecedor S/M"}
+                                {order.supplier?.brand || order.supplier?.name || "Fornecedor S/M"}
                             </p>
                             <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-400">
-                                Pedido #{order.code}
+                                Pedido {order.code}
                             </p>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
