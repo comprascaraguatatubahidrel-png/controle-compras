@@ -42,7 +42,13 @@ export function OrderValueEdit({ orderId, initialValue }: OrderValueEditProps) {
                 <span className="font-semibold text-sm">R$</span>
                 <Input
                     value={value}
-                    onChange={(e) => setValue(e.target.value)}
+                    onChange={(e) => {
+                        // Remove non-digits
+                        const rawValue = e.target.value.replace(/\D/g, "")
+                        // Convert to decimal (e.g. 1234 -> 12.34)
+                        const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
+                        setValue(decimalValue)
+                    }}
                     className="h-8 w-32"
                     disabled={isLoading}
                     autoFocus

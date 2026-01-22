@@ -23,6 +23,7 @@ import { getOrders } from "@/actions/orders"
 import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { OrderFilters } from "@/components/orders/OrderFilters"
+import { ExportButton } from "@/components/orders/ExportButton"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -42,11 +43,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Pedidos de Compra</h1>
-        <Button asChild>
-          <Link href="/orders/new">
-            <Plus className="mr-2 h-4 w-4" /> Novo Pedido
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton orders={orders} />
+          <Button asChild>
+            <Link href="/orders/new">
+              <Plus className="mr-2 h-4 w-4" /> Novo Pedido
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-4">

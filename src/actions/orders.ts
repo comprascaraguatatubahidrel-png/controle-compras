@@ -145,12 +145,25 @@ export async function updateOrderObservations(id: number, observations: string) 
 }
 
 export async function updateOrderValue(id: number, newValue: string) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
     await db.update(orders)
         .set({
             totalValue: newValue,
             lastUpdate: new Date()
         })
         .where(eq(orders.id, id))
+
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: `Valor alterado de R$ ${currentOrder.totalValue || '0.00'} para R$ ${newValue}`,
+    })
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")

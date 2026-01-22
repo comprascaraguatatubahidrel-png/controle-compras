@@ -215,9 +215,12 @@ export function OrderForm() {
                   <FormControl>
                     <Input
                       placeholder="0,00"
-                      type="number"
-                      step="0.01"
-                      {...field}
+                      value={field.value}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/\D/g, "")
+                        const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
+                        field.onChange(decimalValue)
+                      }}
                     />
                   </FormControl>
                   <FormDescription>Apenas para referência e relatórios</FormDescription>
