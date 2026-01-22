@@ -143,3 +143,15 @@ export async function updateOrderObservations(id: number, observations: string) 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
 }
+
+export async function updateOrderValue(id: number, newValue: string) {
+    await db.update(orders)
+        .set({
+            totalValue: newValue,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+}

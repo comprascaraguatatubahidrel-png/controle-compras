@@ -1,3 +1,4 @@
+import { OrderValueEdit } from "@/components/orders/OrderValueEdit"
 import { ArrowLeft, Calendar, FileText, Truck } from "lucide-react"
 import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import Link from "next/link"
@@ -68,7 +69,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                             <span className="text-muted-foreground flex items-center gap-2">
                                 <FileText className="h-4 w-4" /> Valor Total
                             </span>
-                            <span className="font-semibold">R$ {order.totalValue}</span>
+                            <OrderValueEdit orderId={order.id} initialValue={order.totalValue || "0"} />
                         </div>
                         <div className="flex justify-between items-center border-b pb-2">
                             <span className="text-muted-foreground flex items-center gap-2">
