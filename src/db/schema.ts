@@ -49,6 +49,7 @@ export const orders = pgTable('orders', {
   code: text('code').notNull().unique(), // Código do pedido systema interno
   supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
   totalValue: decimal('total_value', { precision: 10, scale: 2 }),
+  remainingValue: decimal('remaining_value', { precision: 10, scale: 2 }),
   status: orderStatusEnum('status').default('SENT').notNull(),
   sentDate: timestamp('sent_date').defaultNow().notNull(),
   expectedArrivalDate: timestamp('expected_arrival_date'), // Data combinada

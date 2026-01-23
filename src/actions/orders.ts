@@ -104,7 +104,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     revalidatePath("/")
 }
 
-export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE", notes?: string, expectedDate?: Date) {
+export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE", notes?: string, expectedDate?: Date, remainingValue?: string) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -118,16 +118,22 @@ export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVE
         .set({
             status: newStatus,
             expectedArrivalDate: expectedDate || currentOrder.expectedArrivalDate,
+            remainingValue: remainingValue || null,
             lastUpdate: new Date()
         })
         .where(eq(orders.id, id))
+
+    let finalNotes = notes || `Status alterado para ${newStatus}`
+    if (newStatus === "RECEIVED_PARTIAL" && remainingValue) {
+        finalNotes = `${notes || 'Recebido com saldo'}. Saldo restante: R$ ${remainingValue}`
+    }
 
     // Add History
     await db.insert(orderHistory).values({
         orderId: id,
         previousStatus: currentOrder.status,
         newStatus: newStatus,
-        notes: notes || `Status alterado para ${newStatus}`,
+        notes: finalNotes,
     })
 
     revalidatePath(`/orders/${id}`)
