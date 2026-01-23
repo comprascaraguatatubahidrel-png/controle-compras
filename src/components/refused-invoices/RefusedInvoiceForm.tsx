@@ -51,7 +51,7 @@ const formSchema = z.object({
     supplierId: z.string().min(1, "Selecione um fornecedor."),
     value: z.string().min(1, "Informe o valor."),
     returnDate: z.date({
-        required_error: "Data da devolução é obrigatória.",
+        message: "Data da devolução é obrigatória.",
     }),
     reason: z.string().min(1, "Informe o motivo da devolução."),
     boletoNumber: z.string().optional(),
