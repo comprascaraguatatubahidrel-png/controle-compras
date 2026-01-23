@@ -8,7 +8,8 @@ export const orderStatusEnum = pgEnum('order_status', [
   'MIRROR_ARRIVED',    // Espelho do Cliente Chegou
   'WAITING_ARRIVAL',   // Aguardando Chegada
   'RECEIVED_COMPLETE', // Recebido Completo
-  'RECEIVED_PARTIAL'   // Recebido com Saldo
+  'RECEIVED_PARTIAL',  // Recebido com Saldo
+  'PENDING_ISSUE'      // Pendência
 ]);
 
 // Tables
@@ -30,6 +31,17 @@ export const representatives = pgTable('representatives', {
   supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const refusedInvoices = pgTable('refused_invoices', {
+  id: serial('id').primaryKey(),
+  invoiceNumber: text('invoice_number').notNull(),
+  value: decimal('value', { precision: 10, scale: 2 }).notNull(),
+  supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
+  returnDate: timestamp('return_date').notNull(),
+  reason: text('reason').notNull(),
+  boletoNumber: text('boleto_number'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const orders = pgTable('orders', {
@@ -58,6 +70,14 @@ export const orderHistory = pgTable('order_history', {
 export const suppliersRelations = relations(suppliers, ({ many }) => ({
   representatives: many(representatives),
   orders: many(orders),
+  refusedInvoices: many(refusedInvoices),
+}));
+
+export const refusedInvoicesRelations = relations(refusedInvoices, ({ one }) => ({
+  supplier: one(suppliers, {
+    fields: [refusedInvoices.supplierId],
+    references: [suppliers.id],
+  }),
 }));
 
 export const representativesRelations = relations(representatives, ({ one }) => ({

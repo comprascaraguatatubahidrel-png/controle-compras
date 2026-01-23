@@ -80,28 +80,31 @@ export async function getOrderById(id: number | string) {
     return order
 }
 
-export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string }) {
+export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date }) {
+    const status = data.initialStatus || 'SENT'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
         code: data.code,
         supplierId: parseInt(data.supplierId),
         totalValue: data.totalValue,
         observations: data.observations,
-        status: 'SENT',
+        status: status,
+        expectedArrivalDate: data.expectedArrivalDate,
     }).returning()
 
     // 2. Add Initial History
     await db.insert(orderHistory).values({
         orderId: newOrder.id,
-        newStatus: 'SENT',
-        notes: 'Pedido criado',
+        newStatus: status,
+        notes: status === 'PENDING_ISSUE' ? 'Pendência registrada' : 'Pedido criado',
     })
 
     revalidatePath("/orders")
+    revalidatePath("/pendencies")
     revalidatePath("/")
 }
 
-export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL", notes?: string, expectedDate?: Date) {
+export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE", notes?: string, expectedDate?: Date) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LayoutDashboard, ShoppingCart, Truck, Users, Package, Menu } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, Truck, Users, Package, Menu, AlertTriangle, FileX } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +35,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             >
                                 <ShoppingCart className="h-4 w-4" />
                                 Pedidos
+                            </Link>
+                            <Link
+                                href="/pendencies"
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            >
+                                <AlertTriangle className="h-4 w-4" />
+                                Pendências
+                            </Link>
+                            <Link
+                                href="/refused-invoices"
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            >
+                                <FileX className="h-4 w-4" />
+                                NFs Recusadas
                             </Link>
                             <Link
                                 href="/suppliers"
@@ -89,6 +103,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     Pedidos
+                                </Link>
+                                <Link
+                                    href="/pendencies"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <AlertTriangle className="h-5 w-5" />
+                                    Pendências
+                                </Link>
+                                <Link
+                                    href="/refused-invoices"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <FileX className="h-5 w-5" />
+                                    NFs Recusadas
                                 </Link>
                                 <Link
                                     href="/suppliers"

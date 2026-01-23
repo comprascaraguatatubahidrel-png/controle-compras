@@ -6,7 +6,9 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Check, ChevronsUpDown, Plus } from "lucide-react"
+import { Check, ChevronsUpDown, Plus, CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Command,
   CommandEmpty,
@@ -48,16 +51,25 @@ const orderSchema = z.object({
   supplierId: z.string().min(1, "Selecione um fornecedor."),
   totalValue: z.string().min(1, "Informe o valor do pedido."),
   observations: z.string().optional(),
+  expectedDate: z.date().optional(),
 })
 
 type OrderFormValues = z.infer<typeof orderSchema>
 
-export function OrderForm() {
+interface OrderFormProps {
+  mode?: 'order' | 'pendency'
+}
+
+export function OrderForm({ mode = 'order' }: OrderFormProps) {
   const router = useRouter()
   const [suppliers, setSuppliers] = useState<{ id: number, name: string }[]>([])
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
+
+  const title = mode === 'pendency' ? 'Nova Pendência' : 'Novo Pedido'
+  const redirectPath = mode === 'pendency' ? '/pendencies' : '/orders'
+  const buttonText = mode === 'pendency' ? 'Lançar Pendência' : 'Lançar Pedido'
 
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderSchema),
@@ -90,8 +102,15 @@ export function OrderForm() {
   async function onSubmit(data: OrderFormValues) {
     setIsLoading(true)
     try {
-      await createOrder(data)
-      router.push("/orders")
+      await createOrder({
+        code: data.code,
+        supplierId: data.supplierId,
+        totalValue: data.totalValue,
+        observations: data.observations,
+        initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'SENT',
+        expectedArrivalDate: data.expectedDate,
+      })
+      router.push(redirectPath)
     } catch (error) {
       console.error("Failed to create order", error)
     } finally {
@@ -102,7 +121,7 @@ export function OrderForm() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Novo Pedido</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -206,38 +225,85 @@ export function OrderForm() {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="totalValue"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Valor Total (R$)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="0,00"
-                      value={field.value}
-                      onChange={(e) => {
-                        const rawValue = e.target.value.replace(/\D/g, "")
-                        const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
-                        field.onChange(decimalValue)
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>Apenas para referência e relatórios</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="totalValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor Total (R$)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="0,00"
+                        value={field.value}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, "")
+                          const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
+                          field.onChange(decimalValue)
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>Apenas para referência e relatórios</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expectedDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data (Opcional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP", { locale: ptBR })
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                          locale={ptBR}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
               name="observations"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Observações</FormLabel>
+                  <FormLabel>
+                    {mode === 'pendency' ? 'Qual a pendência?' : 'Observações'}
+                  </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Alguma observação importante sobre este pedido?"
+                      placeholder={mode === 'pendency' ? "Descreva a pendência deste pedido..." : "Alguma observação importante sobre este pedido?"}
                       className="resize-none"
                       {...field}
                     />
@@ -249,10 +315,10 @@ export function OrderForm() {
 
             <div className="flex justify-end gap-4 pt-4">
               <Button variant="outline" type="button" asChild>
-                <Link href="/orders">Cancelar</Link>
+                <Link href={redirectPath}>Cancelar</Link>
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Salvando..." : "Lançar Pedido"}
+                {isLoading ? "Salvando..." : buttonText}
               </Button>
             </div>
           </form>
