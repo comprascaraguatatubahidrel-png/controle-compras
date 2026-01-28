@@ -31,7 +31,8 @@ export async function createRefusedInvoice(data: {
     supplierId: string,
     returnDate: Date,
     reason: string,
-    boletoNumber?: string
+    boletoNumber?: string,
+    imageUrl?: string
 }) {
     await db.insert(refusedInvoices).values({
         invoiceNumber: data.invoiceNumber,
@@ -40,6 +41,7 @@ export async function createRefusedInvoice(data: {
         returnDate: data.returnDate,
         reason: data.reason,
         boletoNumber: data.boletoNumber,
+        imageUrl: data.imageUrl,
     })
 
     revalidatePath("/refused-invoices")

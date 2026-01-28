@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Check, ChevronsUpDown, Plus, CalendarIcon } from "lucide-react"
+import { Check, ChevronsUpDown, Plus, CalendarIcon, Image as ImageIcon, X } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -55,6 +55,7 @@ const formSchema = z.object({
     }),
     reason: z.string().min(1, "Informe o motivo da devolução."),
     boletoNumber: z.string().optional(),
+    imageUrl: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -65,6 +66,7 @@ export function RefusedInvoiceForm() {
     const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -74,6 +76,7 @@ export function RefusedInvoiceForm() {
             value: "",
             reason: "",
             boletoNumber: "",
+            imageUrl: "",
         },
     })
 
@@ -93,6 +96,29 @@ export function RefusedInvoiceForm() {
         }
 
         setIsSupplierDialogOpen(false)
+    }
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            if (file.size > 3 * 1024 * 1024) {
+                alert("O arquivo é muito grande. O limite é 3MB.")
+                return
+            }
+
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                const base64String = reader.result as string
+                setImagePreview(base64String)
+                form.setValue("imageUrl", base64String)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
+    const removeImage = () => {
+        setImagePreview(null)
+        form.setValue("imageUrl", "")
     }
 
     async function onSubmit(data: FormValues) {
@@ -307,6 +333,57 @@ export function RefusedInvoiceForm() {
                                             className="resize-none"
                                             {...field}
                                         />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="imageUrl"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Imagem da NF Recusada (Opcional)</FormLabel>
+                                    <FormControl>
+                                        <div className="space-y-4">
+                                            {!imagePreview ? (
+                                                <div className="flex items-center justify-center w-full">
+                                                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted border-muted-foreground/25">
+                                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                            <ImageIcon className="w-8 h-8 mb-3 text-muted-foreground" />
+                                                            <p className="mb-2 text-sm text-muted-foreground">
+                                                                <span className="font-semibold">Clique para subir</span> ou arraste
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">PNG ou JPG (Máx. 3MB)</p>
+                                                        </div>
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={handleImageChange}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            ) : (
+                                                <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                                                    <img
+                                                        src={imagePreview}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-contain bg-muted"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        className="absolute top-2 right-2 h-8 w-8"
+                                                        onClick={removeImage}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -42,6 +42,7 @@ export const refusedInvoices = pgTable('refused_invoices', {
   returnDate: timestamp('return_date').notNull(),
   reason: text('reason').notNull(),
   boletoNumber: text('boleto_number'),
+  imageUrl: text('image_url'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

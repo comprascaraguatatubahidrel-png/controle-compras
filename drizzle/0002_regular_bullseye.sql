@@ -1,0 +1,1 @@
+ALTER TABLE "refused_invoices" ADD COLUMN "image_url" text;

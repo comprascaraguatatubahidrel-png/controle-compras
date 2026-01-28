@@ -11,15 +11,16 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { getRefusedInvoices } from "@/actions/refused-invoices"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Eye, Image as ImageIcon } from "lucide-react"
 
 export default async function RefusedInvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
     const { q } = await searchParams
@@ -66,12 +67,13 @@ export default async function RefusedInvoicesPage({ searchParams }: { searchPara
                             <TableHead>Valor</TableHead>
                             <TableHead>Motivo</TableHead>
                             <TableHead>Boleto</TableHead>
+                            <TableHead className="w-[100px]">Imagem</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoices.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                                     Nenhuma nota fiscal recusada encontrada.
                                 </TableCell>
                             </TableRow>
@@ -90,6 +92,31 @@ export default async function RefusedInvoicesPage({ searchParams }: { searchPara
                                         {inv.reason}
                                     </TableCell>
                                     <TableCell>{inv.boletoNumber || '-'}</TableCell>
+                                    <TableCell>
+                                        {inv.imageUrl ? (
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <ImageIcon className="h-4 w-4" />
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-3xl">
+                                                    <DialogHeader>
+                                                        <DialogTitle>NF {inv.invoiceNumber} - {inv.supplier.name}</DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="mt-4 border rounded-lg overflow-hidden bg-muted">
+                                                        <img
+                                                            src={inv.imageUrl}
+                                                            alt={`NF ${inv.invoiceNumber}`}
+                                                            className="w-full h-auto max-h-[70vh] object-contain"
+                                                        />
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+                                        ) : (
+                                            <span className="text-muted-foreground text-xs">-</span>
+                                        )}
+                                    </TableCell>
                                 </TableRow>
                             ))
                         )}
