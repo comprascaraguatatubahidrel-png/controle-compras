@@ -9,7 +9,8 @@ export const orderStatusEnum = pgEnum('order_status', [
   'WAITING_ARRIVAL',   // Aguardando Chegada
   'RECEIVED_COMPLETE', // Recebido Completo
   'RECEIVED_PARTIAL',  // Recebido com Saldo
-  'PENDING_ISSUE'      // Pendência
+  'PENDING_ISSUE',      // Pendência
+  'CANCELLED'          // Cancelado
 ]);
 
 // Tables
@@ -55,6 +56,8 @@ export const orders = pgTable('orders', {
   expectedArrivalDate: timestamp('expected_arrival_date'), // Data combinada
   observations: text('observations'),
   lastUpdate: timestamp('last_update').defaultNow().notNull(),
+  cancellationReason: text('cancellation_reason'),
+  cancelledBy: text('cancelled_by'),
 });
 
 export const orderHistory = pgTable('order_history', {

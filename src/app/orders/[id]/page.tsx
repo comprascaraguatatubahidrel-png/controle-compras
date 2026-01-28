@@ -17,7 +17,10 @@ const statusMap: Record<string, { label: string; className: string }> = {
     WAITING_ARRIVAL: { label: "Aguardando Chegada", className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
     RECEIVED_COMPLETE: { label: "Recebido Completo", className: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" },
     RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+    CANCELLED: { label: "Cancelado", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
 }
+
+import { OrderCancelButton } from "@/components/orders/OrderCancelButton"
 
 // Wrapper for Client Component Logic (Actions)
 import { OrderActionsWrapper } from "@/components/orders/OrderActionsWrapper"
@@ -46,11 +49,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                             Pedido {order.code}
                         </h1>
                         <Badge variant="outline" className={statusMap[order.status]?.className}>
-                            {statusMap[order.status]?.label}
+                            {statusMap[order.status]?.label || order.status}
                         </Badge>
                     </div>
                     <p className="text-muted-foreground">{order.supplier.name}</p>
                 </div>
+
+                {order.status !== 'CANCELLED' && (
+                    <OrderCancelButton orderId={order.id} />
+                )}
 
                 <OrderPrintButton />
 

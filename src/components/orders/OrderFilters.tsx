@@ -45,6 +45,7 @@ const statusMap: Record<string, string> = {
     WAITING_ARRIVAL: "Aguardando Chegada",
     RECEIVED_COMPLETE: "Recebido Completo",
     RECEIVED_PARTIAL: "Recebido com Saldo",
+    CANCELLED: "Cancelado",
 }
 
 export function OrderFilters({ suppliers }: OrderFiltersProps) {

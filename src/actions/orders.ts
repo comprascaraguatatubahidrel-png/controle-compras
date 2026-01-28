@@ -37,10 +37,11 @@ export async function getOrders(search?: string, status?: string, filter?: strin
         )
     }
 
-    // Default: exclude RECEIVED_COMPLETE unless explicitly filtered
+    // Default: exclude RECEIVED_COMPLETE and CANCELLED unless explicitly filtered
     // Don't exclude if user is specifically filtering by something
     if (!status && !filter && !search && !supplierId && !date) {
         whereClause.push(not(eq(orders.status, 'RECEIVED_COMPLETE')))
+        whereClause.push(not(eq(orders.status, 'CANCELLED')))
     }
 
     // Fetch orders with supplier relationship
@@ -104,7 +105,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     revalidatePath("/")
 }
 
-export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE", notes?: string, expectedDate?: Date, remainingValue?: string) {
+export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -138,6 +139,37 @@ export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVE
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+    revalidatePath("/")
+}
+
+export async function cancelOrder(id: number, reason: string, cancelledBy: string) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
+    // Update Order
+    await db.update(orders)
+        .set({
+            status: 'CANCELLED',
+            cancellationReason: reason,
+            cancelledBy: cancelledBy,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
+
+    // Add History
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: 'CANCELLED',
+        notes: `Pedido cancelado por ${cancelledBy}. Motivo: ${reason}`,
+    })
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+    revalidatePath("/cancelled-orders")
     revalidatePath("/")
 }
 

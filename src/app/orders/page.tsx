@@ -32,6 +32,7 @@ const statusMap: Record<string, { label: string; className: string }> = {
   WAITING_ARRIVAL: { label: "Aguardando Chegada", className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400" },
   RECEIVED_COMPLETE: { label: "Recebido Completo", className: "bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400" },
   RECEIVED_PARTIAL: { label: "Recebido com Saldo", className: "bg-red-100 text-red-800 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400" },
+  CANCELLED: { label: "Cancelado", className: "bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
 }
 
 export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string, supplierId?: string, date?: string }> }) {

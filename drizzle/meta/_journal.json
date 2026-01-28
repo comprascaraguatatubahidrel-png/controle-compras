@@ -8,6 +8,13 @@
       "when": 1767785082059,
       "tag": "0000_perfect_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769620682970,
+      "tag": "0001_familiar_lifeguard",
+      "breakpoints": true
     }
   ]
 }

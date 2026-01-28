@@ -31,7 +31,9 @@ export default async function DashboardPage() {
   })
 
   // Calculate Stats
-  const totalOpenValue = allOrders.reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
+  const totalOpenValue = allOrders
+    .filter(o => o.status !== 'CANCELLED')
+    .reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
 
   const noMirrorCount = allOrders.filter(o => o.status === 'SENT').length
 

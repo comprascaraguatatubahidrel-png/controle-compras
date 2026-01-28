@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { LayoutDashboard, ShoppingCart, Truck, Users, Package, Menu, AlertTriangle, FileX } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, Truck, Users, Package, Menu, AlertTriangle, FileX, Ban } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -49,6 +49,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             >
                                 <FileX className="h-4 w-4" />
                                 NFs Recusadas
+                            </Link>
+                            <Link
+                                href="/cancelled-orders"
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            >
+                                <Ban className="h-4 w-4" />
+                                Pedidos Cancelados
                             </Link>
                             <Link
                                 href="/suppliers"
@@ -117,6 +124,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                                 >
                                     <FileX className="h-5 w-5" />
                                     NFs Recusadas
+                                </Link>
+                                <Link
+                                    href="/cancelled-orders"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <Ban className="h-5 w-5" />
+                                    Pedidos Cancelados
                                 </Link>
                                 <Link
                                     href="/suppliers"
