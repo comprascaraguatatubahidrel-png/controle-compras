@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { Check, ChevronsUpDown, Plus, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -110,9 +111,11 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
         initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'SENT',
         expectedArrivalDate: data.expectedDate,
       })
+      toast.success(mode === 'pendency' ? 'Pendência criada com sucesso!' : 'Pedido criado com sucesso!')
       router.push(redirectPath)
     } catch (error) {
       console.error("Failed to create order", error)
+      toast.error('Erro ao salvar. Tente novamente.')
     } finally {
       setIsLoading(false)
     }

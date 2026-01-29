@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Pencil, Check, X } from "lucide-react"
 import { updateOrderObservations } from "@/actions/orders"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface OrderObservationsProps {
     orderId: number
@@ -22,8 +23,10 @@ export function OrderObservations({ orderId, initialObservations }: OrderObserva
         try {
             await updateOrderObservations(orderId, observations)
             setIsEditing(false)
+            toast.success('Observação atualizada!')
         } catch (error) {
             console.error("Failed to update observations", error)
+            toast.error('Erro ao atualizar observação.')
         } finally {
             setIsLoading(false)
         }

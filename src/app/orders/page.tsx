@@ -24,6 +24,8 @@ import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { OrderFilters } from "@/components/orders/OrderFilters"
 import { ExportButton } from "@/components/orders/ExportButton"
+import { QuickActions } from "@/components/orders/QuickActions"
+import { SortableHeader } from "@/components/orders/SortableHeader"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -35,10 +37,34 @@ const statusMap: Record<string, { label: string; className: string }> = {
   CANCELLED: { label: "Cancelado", className: "bg-gray-100 text-gray-800 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
 }
 
-export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string, supplierId?: string, date?: string }> }) {
-  const { q, status, filter, supplierId, date } = await searchParams
-  const orders = await getOrders(q, status, filter, supplierId, date)
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string, filter?: string, supplierId?: string, date?: string, sort?: string, order?: string }> }) {
+  const { q, status, filter, supplierId, date, sort, order: sortOrder } = await searchParams
+  let orders = await getOrders(q, status, filter, supplierId, date)
   const suppliers = await getSuppliers()
+
+  // Server-side sorting based on URL params
+  if (sort) {
+    orders = [...orders].sort((a, b) => {
+      let comparison = 0
+      switch (sort) {
+        case 'code':
+          comparison = a.code.localeCompare(b.code)
+          break
+        case 'supplier':
+          comparison = a.supplier.name.localeCompare(b.supplier.name)
+          break
+        case 'date':
+          const dateA = a.expectedArrivalDate ? new Date(a.expectedArrivalDate).getTime() : 0
+          const dateB = b.expectedArrivalDate ? new Date(b.expectedArrivalDate).getTime() : 0
+          comparison = dateA - dateB
+          break
+        case 'value':
+          comparison = Number(a.totalValue || 0) - Number(b.totalValue || 0)
+          break
+      }
+      return sortOrder === 'desc' ? -comparison : comparison
+    })
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,11 +89,19 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Código</TableHead>
-              <TableHead>Fornecedor</TableHead>
+              <TableHead>
+                <SortableHeader column="code">Código</SortableHeader>
+              </TableHead>
+              <TableHead>
+                <SortableHeader column="supplier">Fornecedor</SortableHeader>
+              </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Chegada Prevista</TableHead>
-              <TableHead>Valor</TableHead>
+              <TableHead>
+                <SortableHeader column="date">Chegada Prevista</SortableHeader>
+              </TableHead>
+              <TableHead>
+                <SortableHeader column="value">Valor</SortableHeader>
+              </TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,8 +115,10 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             ) : (
               orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium flex items-center gap-2">
-                    {order.code}
+                  <TableCell className="font-medium">
+                    <Link href={`/orders/${order.id}`} className="hover:underline">
+                      {order.code}
+                    </Link>
                   </TableCell>
                   <TableCell>{order.supplier.name}</TableCell>
                   <TableCell>
@@ -94,21 +130,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                     {order.expectedArrivalDate ? order.expectedArrivalDate.toLocaleDateString() : "-"}
                   </TableCell>
                   <TableCell>R$ {order.totalValue}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/orders/${order.id}`}>Ver Detalhes</Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <TableCell>
+                    <QuickActions order={{ id: order.id, code: order.code, status: order.status }} />
                   </TableCell>
                 </TableRow>
               ))

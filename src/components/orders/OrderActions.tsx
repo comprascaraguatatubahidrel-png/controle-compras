@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CheckCircle, Truck, AlertTriangle, ThumbsUp } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,10 +39,13 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     const confirmAction = () => {
         if (actionType === "MIRROR") {
             onStatusChange("WAITING_ARRIVAL", "Previsão de chegada definida", date)
+            toast.success('Orçamento aprovado! Aguardando chegada.')
         } else if (actionType === "RECEIVE") {
             onStatusChange("RECEIVED_COMPLETE", "Pedido recebido completo")
+            toast.success('Pedido recebido com sucesso!')
         } else if (actionType === "PARTIAL") {
             onStatusChange("RECEIVED_PARTIAL", "Recebido com saldo pendente", date, remainingValue)
+            toast.success('Pedido registrado com saldo pendente.')
         }
         setIsDialogOpen(false)
         setDate(undefined)
