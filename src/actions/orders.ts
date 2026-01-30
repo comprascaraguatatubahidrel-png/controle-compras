@@ -81,8 +81,8 @@ export async function getOrderById(id: number | string) {
     return order
 }
 
-export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date }) {
-    const status = data.initialStatus || 'SENT'
+export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date }) {
+    const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
         code: data.code,
@@ -97,15 +97,16 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     await db.insert(orderHistory).values({
         orderId: newOrder.id,
         newStatus: status,
-        notes: status === 'PENDING_ISSUE' ? 'Pendência registrada' : 'Pedido criado',
+        notes: status === 'PENDING_ISSUE' ? 'Pendência registrada' : (status === 'SENT' ? 'Enviado ao fornecedor' : 'Pedido criado (Aguardando envio)'),
     })
 
     revalidatePath("/orders")
     revalidatePath("/pendencies")
     revalidatePath("/")
+    return newOrder
 }
 
-export async function updateOrderStatus(id: number, newStatus: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string) {
+export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -205,6 +206,18 @@ export async function updateOrderValue(id: number, newValue: string) {
         newStatus: currentOrder.status,
         notes: `Valor alterado de R$ ${currentOrder.totalValue || '0.00'} para R$ ${newValue}`,
     })
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+}
+
+export async function toggleOrderChecked(id: number, isChecked: boolean) {
+    await db.update(orders)
+        .set({
+            checked: isChecked,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")

@@ -103,16 +103,22 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
   async function onSubmit(data: OrderFormValues) {
     setIsLoading(true)
     try {
-      await createOrder({
+      const newOrder = await createOrder({
         code: data.code,
         supplierId: data.supplierId,
         totalValue: data.totalValue,
         observations: data.observations,
-        initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'SENT',
+        initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'CREATED', // Explicitly set CREATED for new orders
         expectedArrivalDate: data.expectedDate,
       })
       toast.success(mode === 'pendency' ? 'Pendência criada com sucesso!' : 'Pedido criado com sucesso!')
-      router.push(redirectPath)
+
+      if (mode === 'pendency') {
+        router.push('/pendencies')
+      } else {
+        // Redirect to the new order details page to trigger the modal
+        router.push(`/orders/${newOrder.id}`)
+      }
     } catch (error) {
       console.error("Failed to create order", error)
       toast.error('Erro ao salvar. Tente novamente.')

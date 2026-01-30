@@ -11,6 +11,7 @@ import { OrderActions } from "@/components/orders/OrderActions"
 import { getOrderById, updateOrderStatus } from "@/actions/orders"
 
 const statusMap: Record<string, { label: string; className: string }> = {
+    CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
     SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
     APPROVED: { label: "Orçamento Aprovado", className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },
     MIRROR_ARRIVED: { label: "Espelho Chegou", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
@@ -21,6 +22,8 @@ const statusMap: Record<string, { label: string; className: string }> = {
 }
 
 import { OrderCancelButton } from "@/components/orders/OrderCancelButton"
+import { OrderCreatedModal } from "@/components/orders/OrderCreatedModal"
+import { OrderCheckButton } from "@/components/orders/OrderCheckButton"
 
 // Wrapper for Client Component Logic (Actions)
 import { OrderActionsWrapper } from "@/components/orders/OrderActionsWrapper"
@@ -36,6 +39,8 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
 
     return (
         <div className="flex flex-col gap-6">
+            <OrderCreatedModal orderId={order.id} status={order.status} />
+
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="outline" size="icon" asChild>
@@ -51,6 +56,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                         <Badge variant="outline" className={statusMap[order.status]?.className}>
                             {statusMap[order.status]?.label || order.status}
                         </Badge>
+                        <OrderCheckButton orderId={order.id} initialChecked={order.checked} />
                     </div>
                     <p className="text-muted-foreground">{order.supplier.name}</p>
                 </div>

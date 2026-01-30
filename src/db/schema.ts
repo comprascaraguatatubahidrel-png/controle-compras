@@ -1,8 +1,9 @@
-import { pgTable, serial, text, timestamp, integer, decimal, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, integer, decimal, pgEnum, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enums
 export const orderStatusEnum = pgEnum('order_status', [
+  'CREATED',           // Pedido Criado (Aguardando envio)
   'SENT',              // Enviado ao Fornecedor
   'APPROVED',          // Pedido Aprovado
   'MIRROR_ARRIVED',    // Espelho do Cliente Chegou
@@ -52,13 +53,14 @@ export const orders = pgTable('orders', {
   supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
   totalValue: decimal('total_value', { precision: 10, scale: 2 }),
   remainingValue: decimal('remaining_value', { precision: 10, scale: 2 }),
-  status: orderStatusEnum('status').default('SENT').notNull(),
+  status: orderStatusEnum('status').default('CREATED').notNull(),
   sentDate: timestamp('sent_date').defaultNow().notNull(),
   expectedArrivalDate: timestamp('expected_arrival_date'), // Data combinada
   observations: text('observations'),
   lastUpdate: timestamp('last_update').defaultNow().notNull(),
   cancellationReason: text('cancellation_reason'),
   cancelledBy: text('cancelled_by'),
+  checked: boolean('checked').default(false).notNull(), // Conferido pelo gerente
 });
 
 export const orderHistory = pgTable('order_history', {
