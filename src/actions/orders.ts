@@ -3,8 +3,8 @@
 import { db } from "@/db"
 import { orders, orderHistory } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc, and, gte, lte, not } from "drizzle-orm"
-import { startOfDay, endOfDay } from "date-fns"
+import { eq, desc, and, gte, lte, not, or } from "drizzle-orm"
+import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
@@ -54,6 +54,69 @@ export async function getOrders(search?: string, status?: string, filter?: strin
     })
 
     // If there's a search query, filter by code or supplier name
+    if (search) {
+        const searchLower = search.toLowerCase()
+        return results.filter(order =>
+            order.code.toLowerCase().includes(searchLower) ||
+            order.supplier.name.toLowerCase().includes(searchLower)
+        )
+    }
+
+    return results
+}
+
+export async function getPendencies(search?: string, supplierId?: string, date?: string) {
+    const today = new Date()
+    const fifteenDaysAgo = subDays(today, 15)
+
+    // Core Pendency Logic
+    // 1. Explicit PENDING_ISSUE
+    // 2. SENT but older than 15 days
+    // 3. WAITING_ARRIVAL but expected date was more than 15 days ago
+    const pendencyConditions = or(
+        eq(orders.status, 'PENDING_ISSUE'),
+        and(
+            eq(orders.status, 'SENT'),
+            lte(orders.sentDate, fifteenDaysAgo)
+        ),
+        and(
+            eq(orders.status, 'WAITING_ARRIVAL'),
+            lte(orders.expectedArrivalDate, fifteenDaysAgo)
+        )
+    )
+
+    let whereClause: any[] = [pendencyConditions]
+
+    // Filters
+    if (supplierId && supplierId !== 'ALL') {
+        whereClause.push(eq(orders.supplierId, parseInt(supplierId)))
+    }
+
+    if (date) {
+        const filterDate = new Date(date)
+        // For pendencies, date filter might mean "Created On" or "Expected On". 
+        // Let's assume user wants to filter by Sent Date usually, or Created Date.
+        // But for consistency with getOrders, let's use expectedArrivalDate IF it exists, otherwise SentDate might be better?
+        // Actually, the UI for filter just sends 'date'.
+        // Let's stick to modifying the query to check if ANY of the date fields match, or just specific one.
+        // Given the context, usually people filter by when it was supposed to arrive or when it was sent.
+        // Let's try to filter by sentDate for now as it's always present.
+        whereClause.push(
+            and(
+                gte(orders.sentDate, startOfDay(filterDate)),
+                lte(orders.sentDate, endOfDay(filterDate))
+            )
+        )
+    }
+
+    const results = await db.query.orders.findMany({
+        where: and(...whereClause),
+        with: {
+            supplier: true,
+        },
+        orderBy: [desc(orders.sentDate)]
+    })
+
     if (search) {
         const searchLower = search.toLowerCase()
         return results.filter(order =>

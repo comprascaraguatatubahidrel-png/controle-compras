@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Search, Plus, MoreHorizontal, AlertTriangle } from "lucide-react"
+import { Search, Plus, MoreHorizontal, AlertTriangle, CheckCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,6 +28,7 @@ import { QuickActions } from "@/components/orders/QuickActions"
 import { SortableHeader } from "@/components/orders/SortableHeader"
 
 const statusMap: Record<string, { label: string; className: string }> = {
+  CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
   SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400" },
   APPROVED: { label: "Orçamento Aprovado", className: "bg-purple-100 text-purple-800 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400" },
   MIRROR_ARRIVED: { label: "Espelho Chegou", className: "bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400" },
@@ -116,9 +117,14 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
               orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
-                    <Link href={`/orders/${order.id}`} className="hover:underline">
-                      {order.code}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/orders/${order.id}`} className="hover:underline">
+                        {order.code}
+                      </Link>
+                      {order.checked && (
+                        <CheckCircle className="h-4 w-4 text-green-500" title="Conferido pelo gerente" />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{order.supplier.name}</TableCell>
                   <TableCell>

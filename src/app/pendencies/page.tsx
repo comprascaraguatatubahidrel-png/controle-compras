@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Search, Plus, MoreHorizontal, AlertTriangle } from "lucide-react"
+import { Search, Plus, MoreHorizontal, AlertTriangle, CheckCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,7 +18,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getOrders } from "@/actions/orders"
+import { getPendencies } from "@/actions/orders"
 import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { OrderFilters } from "@/components/orders/OrderFilters"
@@ -26,8 +26,8 @@ import { ExportButton } from "@/components/orders/ExportButton"
 
 export default async function PendenciesPage({ searchParams }: { searchParams: Promise<{ q?: string, supplierId?: string, date?: string }> }) {
     const { q, supplierId, date } = await searchParams
-    // Force status to PENDING_ISSUE
-    const orders = await getOrders(q, 'PENDING_ISSUE', undefined, supplierId, date)
+    // Use specialized getPendencies action
+    const orders = await getPendencies(q, supplierId, date)
     const suppliers = await getSuppliers()
 
     return (
@@ -50,17 +50,6 @@ export default async function PendenciesPage({ searchParams }: { searchParams: P
             <div className="flex items-center gap-4">
                 {/* We reuse OrderSearch since it just sets 'q' query param */}
                 <OrderSearch />
-                {/* We can modify OrderFilters to hide status if needed, but for now let's might be better to just show supplier/date filters? 
-            OrderFilters currently has Status, Supplier, Date. 
-            Passing status 'ALL' might override our logic if we use the component blindly. 
-            However, OrderFilters updates URL params 'status'. 
-            In this page we IGNORE 'status' param from URL for fetching, so even if user changes it in filter, it won't affect the list (which is correct behavior for fixed page).
-            BUT it might be confusing for UI. 
-            Ideally we pass a prop to OrderFilters to hide status.
-            But OrderFilters is in another file. I'll just use it for now and maybe the user won't mind or I'll fix it later.
-            Actually, let's just NOT render OrderFilters or render a simplified version? 
-            I'll render it but user selection of status will be ignored by my getOrders call above.
-        */}
             </div>
 
             <div className="rounded-md border">
@@ -87,6 +76,9 @@ export default async function PendenciesPage({ searchParams }: { searchParams: P
                                 <TableRow key={order.id}>
                                     <TableCell className="font-medium flex items-center gap-2">
                                         {order.code}
+                                        {order.checked && (
+                                            <CheckCircle className="h-4 w-4 text-green-500" title="Conferido pelo gerente" />
+                                        )}
                                     </TableCell>
                                     <TableCell>{order.supplier.name}</TableCell>
                                     <TableCell className="max-w-[300px] truncate" title={order.observations || ''}>
