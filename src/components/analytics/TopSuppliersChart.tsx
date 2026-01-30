@@ -42,8 +42,8 @@ export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
                                 borderColor: "hsl(var(--border))",
                             }}
                             itemStyle={{ color: "hsl(var(--foreground))" }}
-                            formatter={(value: number) => [
-                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value),
+                            formatter={(value: number | undefined) => [
+                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0),
                                 "Total"
                             ]}
                         />
