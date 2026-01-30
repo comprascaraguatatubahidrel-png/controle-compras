@@ -35,8 +35,9 @@ export default async function DashboardPage() {
     .filter(o => o.status !== 'CANCELLED')
     .reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
 
+  // Status Counts
+  const createdCount = allOrders.filter(o => o.status === 'CREATED').length
   const noMirrorCount = allOrders.filter(o => o.status === 'SENT').length
-
   const partialCount = allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length
 
   const today = new Date()
@@ -71,23 +72,24 @@ export default async function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Link href="/orders" className="block group">
-          <Card className="hover:shadow-lg transition-all duration-300 hover:border-emerald-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-emerald-500 bg-gradient-to-br from-white to-emerald-50/50 dark:from-zinc-950 dark:to-emerald-950/10">
+        {/* REPLACED: Total Open -> Waiting Shipment */}
+        <Link href="/orders?status=CREATED" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-gray-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-gray-500 bg-gradient-to-br from-white to-gray-50/50 dark:from-zinc-950 dark:to-gray-950/10">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <DollarSign className="h-12 w-12 text-emerald-500" />
+              <Package className="h-12 w-12 text-gray-500" />
             </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Total em Aberto</CardTitle>
-              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
-                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-400">Aguardando Envio</CardTitle>
+              <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold truncate tracking-tight text-emerald-950 dark:text-emerald-50" title={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}>
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOpenValue)}
+              <div className="text-2xl font-bold truncate tracking-tight text-gray-950 dark:text-gray-50">
+                {createdCount}
               </div>
-              <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70 mt-1 font-medium">
-                Pedidos não concluídos
+              <p className="text-xs text-gray-600/80 dark:text-gray-400/70 mt-1 font-medium">
+                Pedidos criados
               </p>
             </CardContent>
           </Card>

@@ -91,6 +91,7 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },
         { href: "/suppliers", icon: <Truck className="h-4 w-4" />, iconMobile: <Truck className="h-5 w-5" />, label: "Fornecedores", count: undefined },
         { href: "/representatives", icon: <Users className="h-4 w-4" />, iconMobile: <Users className="h-5 w-5" />, label: "Representantes", count: undefined },
+        { href: "/analytics", icon: <LayoutDashboard className="h-4 w-4 text-emerald-500" />, iconMobile: <LayoutDashboard className="h-5 w-5" />, label: "Relatórios", count: undefined },
     ]
 
     return (
