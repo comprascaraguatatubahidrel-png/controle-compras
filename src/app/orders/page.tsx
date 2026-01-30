@@ -122,7 +122,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                         {order.code}
                       </Link>
                       {order.checked && (
-                        <CheckCircle className="h-4 w-4 text-green-500" title="Conferido pelo gerente" />
+                        <div title="Conferido pelo gerente">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        </div>
                       )}
                     </div>
                   </TableCell>

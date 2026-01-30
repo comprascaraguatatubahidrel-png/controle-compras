@@ -77,7 +77,9 @@ export default async function PendenciesPage({ searchParams }: { searchParams: P
                                     <TableCell className="font-medium flex items-center gap-2">
                                         {order.code}
                                         {order.checked && (
-                                            <CheckCircle className="h-4 w-4 text-green-500" title="Conferido pelo gerente" />
+                                            <div title="Conferido pelo gerente">
+                                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                            </div>
                                         )}
                                     </TableCell>
                                     <TableCell>{order.supplier.name}</TableCell>
