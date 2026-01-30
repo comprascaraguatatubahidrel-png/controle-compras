@@ -15,7 +15,6 @@ import { ModeToggle } from "@/components/mode-toggle"
 
 interface MenuCounts {
     orders: number
-    pendencies: number
     refusedInvoices: number
     cancelledOrders: number
 }
@@ -86,7 +85,6 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
     const navItems = [
         { href: "/", icon: <LayoutDashboard className="h-4 w-4" />, iconMobile: <LayoutDashboard className="h-5 w-5" />, label: "Dashboard", count: undefined },
         { href: "/orders", icon: <ShoppingCart className="h-4 w-4" />, iconMobile: <ShoppingCart className="h-5 w-5" />, label: "Pedidos", count: counts.orders },
-        { href: "/pendencies", icon: <AlertTriangle className="h-4 w-4" />, iconMobile: <AlertTriangle className="h-5 w-5" />, label: "Pendências", count: counts.pendencies },
         { href: "/refused-invoices", icon: <FileX className="h-4 w-4" />, iconMobile: <FileX className="h-5 w-5" />, label: "NFs Recusadas", count: counts.refusedInvoices },
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },
         { href: "/suppliers", icon: <Truck className="h-4 w-4" />, iconMobile: <Truck className="h-5 w-5" />, label: "Fornecedores", count: undefined },

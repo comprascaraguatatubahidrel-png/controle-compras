@@ -11,8 +11,7 @@ export async function getMenuCounts() {
         )
     })
 
-    const ordersCount = activeOrders.filter(o => o.status !== 'PENDING_ISSUE').length
-    const pendenciesCount = activeOrders.filter(o => o.status === 'PENDING_ISSUE').length
+    const ordersCount = activeOrders.length // Include all active orders
 
     // Count cancelled orders
     const cancelledOrders = await db.query.orders.findMany({
@@ -25,7 +24,6 @@ export async function getMenuCounts() {
 
     return {
         orders: ordersCount,
-        pendencies: pendenciesCount,
         cancelledOrders: cancelledCount,
         refusedInvoices: refusedInvoicesCount.length
     }
