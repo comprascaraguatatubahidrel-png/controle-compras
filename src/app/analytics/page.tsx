@@ -41,7 +41,7 @@ export default async function AnalyticsPage() {
     // Aggregate
     allOrders.forEach(order => {
         // Use sentDate or createdAt. Assuming sentDate is reliable for financial tracking as per user flow.
-        const date = order.sentDate ? new Date(order.sentDate) : new Date(order.createdAt)
+        const date = new Date(order.sentDate)
         const key = format(date, 'MMM/yy', { locale: ptBR })
 
         // Only count if it falls within our tracked months (it should if logic is correct, but safe to check)
