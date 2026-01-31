@@ -11,6 +11,14 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -52,7 +60,9 @@ const orderSchema = z.object({
   supplierId: z.string().min(1, "Selecione um fornecedor."),
   totalValue: z.string().min(1, "Informe o valor do pedido."),
   observations: z.string().optional(),
+
   expectedDate: z.date().optional(),
+  requestedBy: z.string().min(1, "Informe quem solicitou."),
 })
 
 type OrderFormValues = z.infer<typeof orderSchema>
@@ -66,7 +76,11 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
   const [suppliers, setSuppliers] = useState<{ id: number, name: string }[]>([])
   const [isSupplierDialogOpen, setIsSupplierDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
   const [open, setOpen] = useState(false)
+  const [isCustomRequestor, setIsCustomRequestor] = useState(false)
+
+  const predefinedRequestors = ["Thiago", "Fernando", "Junior", "Marcelo", "Sophia"]
 
   const title = mode === 'pendency' ? 'Nova Pendência' : 'Novo Pedido'
   const redirectPath = mode === 'pendency' ? '/pendencies' : '/orders'
@@ -78,7 +92,9 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
       code: "",
       supplierId: "",
       totalValue: "",
+
       observations: "",
+      requestedBy: "",
     },
   })
 
@@ -110,6 +126,7 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
         observations: data.observations,
         initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'CREATED', // Explicitly set CREATED for new orders
         expectedArrivalDate: data.expectedDate,
+        requestedBy: data.requestedBy,
       })
       toast.success(mode === 'pendency' ? 'Pendência criada com sucesso!' : 'Pedido criado com sucesso!')
 
@@ -253,6 +270,69 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                       />
                     </FormControl>
                     <FormDescription>Apenas para referência e relatórios</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="requestedBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Solicitado por</FormLabel>
+                    <div className="flex gap-2">
+                      {!isCustomRequestor ? (
+                        <Select
+                          onValueChange={(val) => {
+                            if (val === 'OTHER') {
+                              setIsCustomRequestor(true)
+                              field.onChange("")
+                            } else {
+                              field.onChange(val)
+                            }
+                          }}
+                          defaultValue={predefinedRequestors.includes(field.value) ? field.value : (field.value ? 'OTHER' : undefined)}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Quem solicitou?" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {predefinedRequestors.map((name) => (
+                              <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                            <SelectItem value="OTHER">Outro (Digitar nome)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex w-full gap-2">
+                          <FormControl>
+                            <Input
+                              placeholder="Digite o nome..."
+                              {...field}
+                              autoFocus
+                            />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setIsCustomRequestor(false)
+                              field.onChange("")
+                            }}
+                            title="Voltar para lista"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

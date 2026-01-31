@@ -144,7 +144,7 @@ export async function getOrderById(id: number | string) {
     return order
 }
 
-export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date }) {
+export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date, requestedBy?: string }) {
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
@@ -154,6 +154,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
         observations: data.observations,
         status: status,
         expectedArrivalDate: data.expectedArrivalDate,
+        requestedBy: data.requestedBy,
     }).returning()
 
     // 2. Add Initial History

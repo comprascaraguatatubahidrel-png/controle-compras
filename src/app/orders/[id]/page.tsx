@@ -1,5 +1,5 @@
 import { OrderValueEdit } from "@/components/orders/OrderValueEdit"
-import { ArrowLeft, Calendar, FileText, Truck } from "lucide-react"
+import { ArrowLeft, Calendar, FileText, Truck, User } from "lucide-react"
 import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -90,6 +90,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                             </span>
                             <span>{order.sentDate.toLocaleDateString()}</span>
                         </div>
+                        {order.requestedBy && (
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                    <User className="h-4 w-4" /> Solicitado por
+                                </span>
+                                <span>{order.requestedBy}</span>
+                            </div>
+                        )}
+
                         <div className="flex justify-between items-center border-b pb-2">
                             <span className="text-muted-foreground flex items-center gap-2">
                                 <Truck className="h-4 w-4" /> Chegada Prevista

@@ -26,6 +26,7 @@ import { OrderFilters } from "@/components/orders/OrderFilters"
 import { ExportButton } from "@/components/orders/ExportButton"
 import { QuickActions } from "@/components/orders/QuickActions"
 import { SortableHeader } from "@/components/orders/SortableHeader"
+import { OrderTableRow } from "@/components/orders/OrderTableRow"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
@@ -115,12 +116,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
               </TableRow>
             ) : (
               orders.map((order) => (
-                <TableRow key={order.id}>
+                <OrderTableRow key={order.id} orderId={order.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <Link href={`/orders/${order.id}`} className="hover:underline">
+                      <span className="hover:underline">
                         {order.code}
-                      </Link>
+                      </span>
                       {order.checked && (
                         <div title="Conferido pelo gerente">
                           <CheckCircle className="h-4 w-4 text-green-500" />
@@ -128,7 +129,16 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{order.supplier.name}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{order.supplier.name}</span>
+                      {order.requestedBy && (
+                        <span className="text-xs text-muted-foreground">
+                          {order.requestedBy}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={statusMap[order.status]?.className}>
                       {statusMap[order.status]?.label || order.status}
@@ -141,7 +151,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                   <TableCell>
                     <QuickActions order={{ id: order.id, code: order.code, status: order.status }} />
                   </TableCell>
-                </TableRow>
+                </OrderTableRow>
               ))
             )}
           </TableBody>

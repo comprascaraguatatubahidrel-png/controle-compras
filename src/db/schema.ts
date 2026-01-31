@@ -61,6 +61,7 @@ export const orders = pgTable('orders', {
   cancellationReason: text('cancellation_reason'),
   cancelledBy: text('cancelled_by'),
   checked: boolean('checked').default(false).notNull(), // Conferido pelo gerente
+  requestedBy: text('requested_by'), // Nome de quem fez o pedido
 });
 
 export const orderHistory = pgTable('order_history', {
