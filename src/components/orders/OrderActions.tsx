@@ -67,7 +67,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     }
 
     return (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
             {status === "SENT" && (
                 <>
                     <Button onClick={() => handleAction("MIRROR")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">

@@ -43,33 +43,37 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             <OrderCreatedModal orderId={order.id} status={order.status} />
 
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" asChild>
-                    <Link href="/orders">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                </Button>
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-lg font-semibold md:text-2xl">
-                            Pedido {order.code}
-                        </h1>
-                        <Badge variant="outline" className={statusMap[order.status]?.className}>
-                            {statusMap[order.status]?.label || order.status}
-                        </Badge>
-                        <OrderCheckButton orderId={order.id} initialChecked={order.checked} />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b pb-4">
+                <div className="flex items-center gap-4 flex-1">
+                    <Button variant="outline" size="icon" asChild className="shrink-0">
+                        <Link href="/orders">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="text-lg font-semibold md:text-2xl truncate">
+                                Pedido {order.code}
+                            </h1>
+                            <Badge variant="outline" className={statusMap[order.status]?.className}>
+                                {statusMap[order.status]?.label || order.status}
+                            </Badge>
+                            <OrderCheckButton orderId={order.id} initialChecked={order.checked} />
+                        </div>
+                        <p className="text-muted-foreground truncate">{order.supplier.name}</p>
                     </div>
-                    <p className="text-muted-foreground">{order.supplier.name}</p>
                 </div>
 
-                {order.status !== 'CANCELLED' && (
-                    <OrderCancelButton orderId={order.id} />
-                )}
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    {order.status !== 'CANCELLED' && (
+                        <OrderCancelButton orderId={order.id} />
+                    )}
 
-                <OrderPrintButton />
+                    <OrderPrintButton />
 
-                {/* Actions Component */}
-                <OrderActionsWrapper orderId={order.id} currentStatus={order.status} />
+                    {/* Actions Component */}
+                    <OrderActionsWrapper orderId={order.id} currentStatus={order.status} />
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
