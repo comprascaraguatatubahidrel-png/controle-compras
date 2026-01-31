@@ -133,7 +133,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                     <div className="flex flex-col">
                       <span>{order.supplier.name}</span>
                       {order.requestedBy && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
                           {order.requestedBy}
                         </span>
                       )}
