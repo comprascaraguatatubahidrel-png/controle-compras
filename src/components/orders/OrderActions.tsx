@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle, Truck, AlertTriangle, ThumbsUp } from "lucide-react"
+import { CheckCircle, Truck, AlertTriangle, ThumbsUp, CalendarClock } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
@@ -26,10 +26,10 @@ interface OrderActionsProps {
 export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     const [date, setDate] = useState<Date>()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [actionType, setActionType] = useState<"MIRROR" | "RECEIVE" | "PARTIAL" | null>(null)
+    const [actionType, setActionType] = useState<"MIRROR" | "RECEIVE" | "PARTIAL" | "EXTEND" | null>(null)
     const [remainingValue, setRemainingValue] = useState("")
 
-    const handleAction = (type: "MIRROR" | "RECEIVE") => {
+    const handleAction = (type: "MIRROR" | "RECEIVE" | "EXTEND") => {
         setActionType(type)
         setIsDialogOpen(true)
         setRemainingValue("")
@@ -46,6 +46,16 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
         } else if (actionType === "PARTIAL") {
             onStatusChange("RECEIVED_PARTIAL", "Recebido com saldo pendente", date, remainingValue)
             toast.success('Pedido registrado com saldo pendente.')
+        } else if (actionType === "EXTEND") {
+            let note = ""
+            if (status === "SENT") {
+                note = "Prazo de retorno do espelho estendido"
+            } else if (status === "WAITING_ARRIVAL") {
+                note = "Previsão de chegada reagendada"
+            }
+            // Keep the same status, just update specific fields
+            onStatusChange(status, note, date)
+            toast.success('Prazo estendido com sucesso!')
         }
         setIsDialogOpen(false)
         setDate(undefined)
@@ -59,17 +69,31 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     return (
         <div className="flex gap-2">
             {status === "SENT" && (
-                <Button onClick={() => handleAction("MIRROR")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
-                    <ThumbsUp className="mr-2 h-4 w-4" />
-                    Aprovar Orçamento
-                </Button>
+                <>
+                    <Button onClick={() => handleAction("MIRROR")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        Aprovar Orçamento
+                    </Button>
+                    <Button onClick={() => handleAction("EXTEND")} variant="ghost" className="text-muted-foreground hover:text-primary">
+                        <CalendarClock className="mr-2 h-4 w-4" />
+                        Estender Prazo
+                    </Button>
+                </>
             )}
 
             {(status === "WAITING_ARRIVAL" || status === "RECEIVED_PARTIAL") && (
-                <Button onClick={() => handleAction("RECEIVE")}>
-                    <Truck className="mr-2 h-4 w-4" />
-                    Receber Pedido
-                </Button>
+                <>
+                    <Button onClick={() => handleAction("RECEIVE")}>
+                        <Truck className="mr-2 h-4 w-4" />
+                        Receber Pedido
+                    </Button>
+                    {status === "WAITING_ARRIVAL" && (
+                        <Button onClick={() => handleAction("EXTEND")} variant="ghost" className="text-muted-foreground hover:text-primary">
+                            <CalendarClock className="mr-2 h-4 w-4" />
+                            Estender Prazo
+                        </Button>
+                    )}
+                </>
             )}
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -79,11 +103,13 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                             {actionType === "MIRROR" && "Confirmar Espelho"}
                             {actionType === "RECEIVE" && "Recebimento do Pedido"}
                             {actionType === "PARTIAL" && "Saldo Pendente"}
+                            {actionType === "EXTEND" && "Estender Prazo"}
                         </DialogTitle>
                         <DialogDescription>
                             {actionType === "MIRROR" && "Informe a data prevista de chegada combinada com o fornecedor."}
                             {actionType === "RECEIVE" && "O pedido chegou completo ou ficou algum saldo pendente?"}
                             {actionType === "PARTIAL" && "Informe o valor restante e a nova data prevista."}
+                            {actionType === "EXTEND" && "Informe a nova data prevista."}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -114,7 +140,9 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                             )}
 
                             <div className="flex flex-col gap-2">
-                                <span className="text-sm font-medium">Data Prevista de Chegada</span>
+                                <span className="text-sm font-medium">
+                                    {actionType === "MIRROR" ? "Data Prevista de Chegada" : "Nova Data Prevista"}
+                                </span>
                                 {date && (
                                     <p className="text-sm text-muted-foreground">
                                         Selecionado: {format(date, "PPP", { locale: ptBR })}
