@@ -250,6 +250,19 @@ export async function updateOrderObservations(id: number, observations: string) 
     revalidatePath("/orders")
 }
 
+export async function updateOrderRequestedBy(id: number, requestedBy: string) {
+    await db.update(orders)
+        .set({
+            requestedBy: requestedBy,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+}
+
+
 export async function updateOrderValue(id: number, newValue: string) {
     const currentOrder = await db.query.orders.findFirst({
         where: eq(orders.id, id),
