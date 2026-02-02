@@ -126,16 +126,31 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                         <div className="py-4 space-y-4">
                             {actionType === "PARTIAL" && (
                                 <div className="space-y-2">
-                                    <span className="text-sm font-medium">Valor do Saldo (R$)</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium">Valor do Saldo (R$)</span>
+                                        <span className="text-[10px] text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded">Opcional</span>
+                                    </div>
                                     <Input
                                         placeholder="Ex: 1500,00"
                                         value={remainingValue}
                                         onChange={(e) => {
-                                            const rawValue = e.target.value.replace(/\D/g, "")
+                                            const val = e.target.value
+                                            if (val === "") {
+                                                setRemainingValue("")
+                                                return
+                                            }
+                                            const rawValue = val.replace(/\D/g, "")
+                                            if (rawValue === "") {
+                                                setRemainingValue("")
+                                                return
+                                            }
                                             const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
                                             setRemainingValue(decimalValue)
                                         }}
                                     />
+                                    <p className="text-[11px] text-muted-foreground italic">
+                                        Pode deixar em branco se não souber o valor exato agora.
+                                    </p>
                                 </div>
                             )}
 
@@ -154,6 +169,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                                         selected={date}
                                         onSelect={setDate}
                                         initialFocus
+                                        locale={ptBR}
                                     />
                                 </div>
                             </div>
@@ -162,7 +178,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
 
                     {actionType !== "RECEIVE" && (
                         <DialogFooter>
-                            <Button onClick={confirmAction} disabled={!date || (actionType === "PARTIAL" && !remainingValue)}>
+                            <Button onClick={confirmAction} disabled={!date}>
                                 Confirmar
                             </Button>
                         </DialogFooter>
