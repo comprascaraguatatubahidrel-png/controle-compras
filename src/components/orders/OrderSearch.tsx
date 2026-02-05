@@ -1,7 +1,7 @@
 "use client"
 
 import { Search, X } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useEffect, useState, useTransition } from "react"
 import { Input } from "@/components/ui/input"
 import { useDebounce } from "@/lib/useDebounce"
@@ -9,6 +9,7 @@ import { useDebounce } from "@/lib/useDebounce"
 export function OrderSearch() {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const pathname = usePathname()
     const [isPending, startTransition] = useTransition()
 
     const initialQuery = searchParams.get("q") || ""
@@ -24,9 +25,9 @@ export function OrderSearch() {
         }
 
         startTransition(() => {
-            router.push(`/orders?${params.toString()}`)
+            router.push(`${pathname}?${params.toString()}`)
         })
-    }, [debouncedValue, router, searchParams])
+    }, [debouncedValue, router, searchParams, pathname])
 
     return (
         <div className="relative flex-1">
@@ -54,3 +55,4 @@ export function OrderSearch() {
         </div>
     )
 }
+
