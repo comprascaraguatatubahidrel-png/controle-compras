@@ -19,12 +19,20 @@ export async function getMenuCounts() {
     })
     const cancelledCount = cancelledOrders.length
 
+    // Count orders with pending balance
+    const pendingBalanceOrders = await db.query.orders.findMany({
+        where: eq(orders.status, 'RECEIVED_PARTIAL')
+    })
+    const pendingBalanceCount = pendingBalanceOrders.length
+
     // Count refused invoices
     const refusedInvoicesCount = await db.query.refusedInvoices.findMany()
 
     return {
         orders: ordersCount,
         cancelledOrders: cancelledCount,
-        refusedInvoices: refusedInvoicesCount.length
+        refusedInvoices: refusedInvoicesCount.length,
+        pendingBalance: pendingBalanceCount
     }
 }
+

@@ -62,6 +62,7 @@ export const orders = pgTable('orders', {
   cancelledBy: text('cancelled_by'),
   checked: boolean('checked').default(false).notNull(), // Conferido pelo gerente
   requestedBy: text('requested_by'), // Nome de quem fez o pedido
+  partialReason: text('partial_reason'), // Motivo do saldo pendente
 });
 
 export const orderHistory = pgTable('order_history', {
@@ -71,6 +72,17 @@ export const orderHistory = pgTable('order_history', {
   newStatus: orderStatusEnum('new_status').notNull(),
   changeDate: timestamp('change_date').defaultNow().notNull(),
   notes: text('notes'), // Justificativa ou contexto da mudança
+});
+
+// Histórico de recebimentos parciais
+export const partialReceipts = pgTable('partial_receipts', {
+  id: serial('id').primaryKey(),
+  orderId: integer('order_id').references(() => orders.id).notNull(),
+  receivedValue: decimal('received_value', { precision: 10, scale: 2 }).notNull(),
+  remainingValueAfter: decimal('remaining_value_after', { precision: 10, scale: 2 }).notNull(),
+  receivedDate: timestamp('received_date').defaultNow().notNull(),
+  receivedBy: text('received_by'),
+  notes: text('notes'),
 });
 
 // Relations
@@ -101,11 +113,19 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     references: [suppliers.id],
   }),
   history: many(orderHistory),
+  partialReceipts: many(partialReceipts),
 }));
 
 export const orderHistoryRelations = relations(orderHistory, ({ one }) => ({
   order: one(orders, {
     fields: [orderHistory.orderId],
+    references: [orders.id],
+  }),
+}));
+
+export const partialReceiptsRelations = relations(partialReceipts, ({ one }) => ({
+  order: one(orders, {
+    fields: [partialReceipts.orderId],
     references: [orders.id],
   }),
 }));

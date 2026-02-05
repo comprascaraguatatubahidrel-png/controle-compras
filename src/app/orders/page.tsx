@@ -27,6 +27,7 @@ import { ExportButton } from "@/components/orders/ExportButton"
 import { QuickActions } from "@/components/orders/QuickActions"
 import { SortableHeader } from "@/components/orders/SortableHeader"
 import { OrderTableRow } from "@/components/orders/OrderTableRow"
+import { PendingBalanceIndicator } from "@/components/orders/PendingBalanceIndicator"
 
 const statusMap: Record<string, { label: string; className: string }> = {
   CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
@@ -147,7 +148,17 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                   <TableCell>
                     {order.expectedArrivalDate ? order.expectedArrivalDate.toLocaleDateString() : "-"}
                   </TableCell>
-                  <TableCell>R$ {order.totalValue}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <span>R$ {order.totalValue}</span>
+                      {order.status === 'RECEIVED_PARTIAL' && order.remainingValue && (
+                        <PendingBalanceIndicator
+                          remainingValue={order.remainingValue}
+                          expectedArrivalDate={order.expectedArrivalDate}
+                        />
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <QuickActions order={{ id: order.id, code: order.code, status: order.status }} />
                   </TableCell>

@@ -170,7 +170,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     return newOrder
 }
 
-export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string) {
+export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string, partialReason?: string) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -185,6 +185,7 @@ export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT
             status: newStatus,
             expectedArrivalDate: expectedDate || currentOrder.expectedArrivalDate,
             remainingValue: remainingValue || null,
+            partialReason: newStatus === "RECEIVED_PARTIAL" ? (partialReason || null) : null,
             lastUpdate: new Date()
         })
         .where(eq(orders.id, id))
@@ -192,6 +193,9 @@ export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT
     let finalNotes = notes || `Status alterado para ${newStatus}`
     if (newStatus === "RECEIVED_PARTIAL" && remainingValue) {
         finalNotes = `${notes || 'Recebido com saldo'}. Saldo restante: R$ ${remainingValue}`
+        if (partialReason) {
+            finalNotes += `. Motivo: ${partialReason}`
+        }
     }
 
     // Add History
@@ -204,6 +208,7 @@ export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+    revalidatePath("/pending-balance")
     revalidatePath("/")
 }
 

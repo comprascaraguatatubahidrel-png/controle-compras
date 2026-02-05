@@ -1,5 +1,5 @@
 import { OrderValueEdit } from "@/components/orders/OrderValueEdit"
-import { ArrowLeft, Calendar, FileText, Truck, User } from "lucide-react"
+import { ArrowLeft, Calendar, FileText, Truck, User, AlertTriangle } from "lucide-react"
 import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import { OrderRequestedByEdit } from "@/components/orders/OrderRequestedByEdit"
 import Link from "next/link"
@@ -10,6 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { OrderActions } from "@/components/orders/OrderActions"
 import { getOrderById, updateOrderStatus } from "@/actions/orders"
+import { RemainingValueEdit } from "@/components/orders/RemainingValueEdit"
+import { CloseBalanceModal } from "@/components/orders/CloseBalanceModal"
+import { PartialReceiptsHistory } from "@/components/orders/PartialReceiptsHistory"
+import { getPartialReceipts } from "@/actions/partial-receipts"
 
 const statusMap: Record<string, { label: string; className: string }> = {
     CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
@@ -37,6 +41,11 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
     if (!order) {
         notFound()
     }
+
+    // Buscar histórico de recebimentos parciais se o pedido tiver saldo
+    const partialReceipts = order.status === 'RECEIVED_PARTIAL'
+        ? await getPartialReceipts(order.id)
+        : []
 
     return (
         <div className="flex flex-col gap-6">
@@ -134,6 +143,42 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Seção de Saldo Pendente - só aparece quando status = RECEIVED_PARTIAL */}
+            {order.status === 'RECEIVED_PARTIAL' && (
+                <Card className="border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/10">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            <CardTitle className="text-amber-700 dark:text-amber-400">Saldo Pendente</CardTitle>
+                        </div>
+                        <CloseBalanceModal orderId={order.id} remainingValue={order.remainingValue} />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-1">
+                                <span className="text-sm text-muted-foreground">Valor do Saldo</span>
+                                <div className="flex items-center gap-2">
+                                    <RemainingValueEdit orderId={order.id} initialValue={order.remainingValue} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-sm text-muted-foreground">Motivo</span>
+                                <p className="text-sm font-medium">
+                                    {order.partialReason || <span className="italic text-muted-foreground">Não informado</span>}
+                                </p>
+                            </div>
+                        </div>
+
+                        {partialReceipts.length > 0 && (
+                            <div className="pt-4 border-t">
+                                <h4 className="text-sm font-semibold mb-3">Histórico de Recebimentos</h4>
+                                <PartialReceiptsHistory receipts={partialReceipts} />
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
         </div>
     )
 }

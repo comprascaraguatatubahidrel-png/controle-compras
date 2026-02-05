@@ -20,7 +20,7 @@ import { Calendar } from "@/components/ui/calendar"
 
 interface OrderActionsProps {
     status: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
-    onStatusChange: (newStatus: any, notes?: string, date?: Date, remainingValue?: string) => void
+    onStatusChange: (newStatus: any, notes?: string, date?: Date, remainingValue?: string, partialReason?: string) => void
 }
 
 export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
@@ -28,11 +28,22 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [actionType, setActionType] = useState<"MIRROR" | "RECEIVE" | "PARTIAL" | "EXTEND" | null>(null)
     const [remainingValue, setRemainingValue] = useState("")
+    const [partialReason, setPartialReason] = useState("")
+
+    const reasonOptions = [
+        "Produto em falta no fornecedor",
+        "Entrega dividida por volume",
+        "Problema na logística",
+        "Produção atrasada",
+        "Divergência na quantidade",
+        "Outro"
+    ]
 
     const handleAction = (type: "MIRROR" | "RECEIVE" | "EXTEND") => {
         setActionType(type)
         setIsDialogOpen(true)
         setRemainingValue("")
+        setPartialReason("")
         setDate(undefined)
     }
 
@@ -44,7 +55,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
             onStatusChange("RECEIVED_COMPLETE", "Pedido recebido completo")
             toast.success('Pedido recebido com sucesso!')
         } else if (actionType === "PARTIAL") {
-            onStatusChange("RECEIVED_PARTIAL", "Recebido com saldo pendente", date, remainingValue)
+            onStatusChange("RECEIVED_PARTIAL", "Recebido com saldo pendente", date, remainingValue, partialReason)
             toast.success('Pedido registrado com saldo pendente.')
         } else if (actionType === "EXTEND") {
             let note = ""
@@ -60,6 +71,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
         setIsDialogOpen(false)
         setDate(undefined)
         setRemainingValue("")
+        setPartialReason("")
     }
 
     const handlePartial = () => {
@@ -125,32 +137,51 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                     ) : (
                         <div className="py-4 space-y-4">
                             {actionType === "PARTIAL" && (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-medium">Valor do Saldo (R$)</span>
-                                        <span className="text-[10px] text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded">Opcional</span>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium">Valor do Saldo (R$)</span>
+                                            <span className="text-[10px] text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded">Opcional</span>
+                                        </div>
+                                        <Input
+                                            placeholder="Ex: 1500,00"
+                                            value={remainingValue}
+                                            onChange={(e) => {
+                                                const val = e.target.value
+                                                if (val === "") {
+                                                    setRemainingValue("")
+                                                    return
+                                                }
+                                                const rawValue = val.replace(/\D/g, "")
+                                                if (rawValue === "") {
+                                                    setRemainingValue("")
+                                                    return
+                                                }
+                                                const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
+                                                setRemainingValue(decimalValue)
+                                            }}
+                                        />
+                                        <p className="text-[11px] text-muted-foreground italic">
+                                            Pode deixar em branco se não souber o valor exato agora.
+                                        </p>
                                     </div>
-                                    <Input
-                                        placeholder="Ex: 1500,00"
-                                        value={remainingValue}
-                                        onChange={(e) => {
-                                            const val = e.target.value
-                                            if (val === "") {
-                                                setRemainingValue("")
-                                                return
-                                            }
-                                            const rawValue = val.replace(/\D/g, "")
-                                            if (rawValue === "") {
-                                                setRemainingValue("")
-                                                return
-                                            }
-                                            const decimalValue = (parseInt(rawValue) / 100).toFixed(2)
-                                            setRemainingValue(decimalValue)
-                                        }}
-                                    />
-                                    <p className="text-[11px] text-muted-foreground italic">
-                                        Pode deixar em branco se não souber o valor exato agora.
-                                    </p>
+
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium">Motivo do Saldo</span>
+                                            <span className="text-[10px] text-muted-foreground uppercase bg-muted px-1.5 py-0.5 rounded">Opcional</span>
+                                        </div>
+                                        <select
+                                            value={partialReason}
+                                            onChange={(e) => setPartialReason(e.target.value)}
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        >
+                                            <option value="">Selecione o motivo...</option>
+                                            {reasonOptions.map((reason) => (
+                                                <option key={reason} value={reason}>{reason}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             )}
 
