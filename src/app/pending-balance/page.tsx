@@ -14,6 +14,7 @@ import { getPendingBalanceOrders } from "@/actions/partial-receipts"
 import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SupplierFilter } from "@/components/orders/SupplierFilter"
 
 export const dynamic = 'force-dynamic'
 
@@ -95,15 +96,7 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
             {/* Filtros */}
             <div className="flex items-center gap-4">
                 <OrderSearch />
-                <select
-                    className="flex h-10 w-full max-w-[200px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    defaultValue={supplierId || "ALL"}
-                >
-                    <option value="ALL">Todos os Fornecedores</option>
-                    {suppliers.map((supplier) => (
-                        <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
-                    ))}
-                </select>
+                <SupplierFilter suppliers={suppliers} />
             </div>
 
             {/* Tabela */}
