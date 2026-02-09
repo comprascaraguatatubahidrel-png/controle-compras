@@ -109,7 +109,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
             )}
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>
                             {actionType === "MIRROR" && "Confirmar Espelho"}
@@ -135,7 +135,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                             </Button>
                         </div>
                     ) : (
-                        <div className="py-4 space-y-4">
+                        <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                             {actionType === "PARTIAL" && (
                                 <div className="space-y-4">
                                     <div className="space-y-2">
