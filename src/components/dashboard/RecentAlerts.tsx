@@ -15,9 +15,9 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
 
         // Mirror delayed
         if (o.status === 'SENT') {
-            const twoDaysAgo = new Date()
-            twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
-            if (new Date(o.sentDate) < twoDaysAgo) return true
+            const threeDaysAgo = new Date()
+            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
+            if (new Date(o.sentDate) < threeDaysAgo) return true
         }
 
         return false
@@ -41,7 +41,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
     return (
         <div className="space-y-3">
             {alerts.map((order) => {
-                const isMirrorDelay = order.status === 'SENT' && (new Date(order.sentDate) < new Date(Date.now() - 2 * 24 * 60 * 60 * 1000))
+                const isMirrorDelay = order.status === 'SENT' && (new Date(order.sentDate) < new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))
                 const isPartial = order.status === 'RECEIVED_PARTIAL'
 
                 let title = "Pedido Atrasado"

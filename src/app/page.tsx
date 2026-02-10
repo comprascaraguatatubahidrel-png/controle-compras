@@ -50,9 +50,9 @@ export default async function DashboardPage() {
   const alertsCount = allOrders.filter(o => {
     // Alert 1: Espelho atrasado (SENT > 2 days)
     if (o.status === 'SENT') {
-      const twoDaysAgo = new Date()
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
-      if (o.sentDate < twoDaysAgo) return true
+      const threeDaysAgo = new Date()
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
+      if (o.sentDate < threeDaysAgo) return true
     }
 
     // Alert 2 & 3: Delayed arrival or overdue partial
