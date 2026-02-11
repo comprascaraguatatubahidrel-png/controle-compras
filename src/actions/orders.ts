@@ -304,3 +304,51 @@ export async function toggleOrderChecked(id: number, isChecked: boolean) {
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
 }
+
+export async function deleteOrder(id: number) {
+    // 1. Delete history first due to foreign key constraints if they aren't CASCADE
+    // Actually in schema.ts they don't have onDelete: 'cascade' explicitly mentioned 
+    // but Drizzle might handle it if configured. Looking at schema.ts, it's just references().
+    await db.delete(orderHistory).where(eq(orderHistory.orderId, id))
+
+    // 2. Delete partial receipts if any
+    await db.delete(partialReceipts).where(eq(partialReceipts.orderId, id))
+
+    // 3. Delete the order
+    await db.delete(orders).where(eq(orders.id, id))
+
+    revalidatePath("/orders")
+    revalidatePath("/cancelled-orders")
+    revalidatePath("/")
+}
+
+export async function restoreOrder(id: number) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
+    // Update Order to CREATED status
+    await db.update(orders)
+        .set({
+            status: 'CREATED',
+            cancellationReason: null,
+            cancelledBy: null,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
+
+    // Add History
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: 'CANCELLED',
+        newStatus: 'CREATED',
+        notes: `Pedido restaurado para o status inicial.`,
+    })
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+    revalidatePath("/cancelled-orders")
+    revalidatePath("/")
+}

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FileX } from "lucide-react"
+import { FileX, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { getOrders } from "@/actions/orders"
+import { OrderActionsClient } from "@/components/orders/OrderActionsClient"
 
 export default async function CancelledOrdersPage() {
     // Fetch only cancelled orders
@@ -54,13 +55,19 @@ export default async function CancelledOrdersPage() {
                                         {order.lastUpdate ? order.lastUpdate.toLocaleDateString() : "-"}
                                     </TableCell>
                                     <TableCell>{order.cancelledBy || "-"}</TableCell>
-                                    <TableCell className="max-w-xs truncate" title={order.cancellationReason || ""}>
+                                    <TableCell className="max-w-[200px] truncate" title={order.cancellationReason || ""}>
                                         {order.cancellationReason || "-"}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" asChild>
-                                            <Link href={`/orders/${order.id}`}>Ver Detalhes</Link>
-                                        </Button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button variant="ghost" size="sm" asChild className="h-8">
+                                                <Link href={`/orders/${order.id}`}>Detalhes</Link>
+                                            </Button>
+                                            <OrderActionsClient
+                                                orderId={order.id}
+                                                orderCode={order.code}
+                                            />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))
