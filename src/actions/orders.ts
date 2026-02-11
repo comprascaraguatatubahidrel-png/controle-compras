@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { orders, orderHistory } from "@/db/schema"
+import { orders, orderHistory, partialReceipts } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { eq, desc, and, gte, lte, not, or } from "drizzle-orm"
 import { startOfDay, endOfDay, subDays } from "date-fns"
