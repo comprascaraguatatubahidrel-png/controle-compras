@@ -3,11 +3,12 @@ import { orders, refusedInvoices } from "@/db/schema"
 import { eq, not, or, and } from "drizzle-orm"
 
 export async function getMenuCounts() {
-    // Count active orders (excluding completed and cancelled)
+    // Count active orders (excluding completed, cancelled, and feeding)
     const activeOrders = await db.query.orders.findMany({
         where: and(
             not(eq(orders.status, 'RECEIVED_COMPLETE')),
-            not(eq(orders.status, 'CANCELLED'))
+            not(eq(orders.status, 'CANCELLED')),
+            not(eq(orders.status, 'FEEDING'))
         )
     })
 
@@ -25,6 +26,12 @@ export async function getMenuCounts() {
     })
     const pendingBalanceCount = pendingBalanceOrders.length
 
+    // Count feeding orders
+    const feedingOrders = await db.query.orders.findMany({
+        where: eq(orders.status, 'FEEDING')
+    })
+    const feedingCount = feedingOrders.length
+
     // Count refused invoices
     const refusedInvoicesCount = await db.query.refusedInvoices.findMany()
 
@@ -32,7 +39,8 @@ export async function getMenuCounts() {
         orders: ordersCount,
         cancelledOrders: cancelledCount,
         refusedInvoices: refusedInvoicesCount.length,
-        pendingBalance: pendingBalanceCount
+        pendingBalance: pendingBalanceCount,
+        feedingOrders: feedingCount
     }
 }
 

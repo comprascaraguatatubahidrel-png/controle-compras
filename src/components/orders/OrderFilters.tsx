@@ -39,6 +39,7 @@ interface OrderFiltersProps {
 }
 
 const statusMap: Record<string, string> = {
+    FEEDING: "Alimentando",
     SENT: "Enviado ao Fornecedor",
     APPROVED: "Orçamento Aprovado",
     MIRROR_ARRIVED: "Espelho Chegou",

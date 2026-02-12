@@ -25,6 +25,7 @@ export function OrderCreatedModal({ orderId, status }: OrderCreatedModalProps) {
 
     useEffect(() => {
         // Only show if status is explicitly CREATED (Pedido Criado)
+        // Don't show for FEEDING orders
         if (status === 'CREATED') {
             setOpen(true)
         }

@@ -10,6 +10,7 @@ import {
   Clock,
   DollarSign,
   Package,
+  Layers,
 } from "lucide-react"
 import { RecentAlerts } from "@/components/dashboard/RecentAlerts"
 import { TopSuppliers } from "@/components/dashboard/TopSuppliers"
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
     .reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
 
   // Status Counts
+  const feedingCount = allOrders.filter(o => o.status === 'FEEDING').length
   const createdCount = allOrders.filter(o => o.status === 'CREATED').length
   const noMirrorCount = allOrders.filter(o => o.status === 'SENT').length
   const partialCount = allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length
@@ -71,7 +73,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
         {/* REPLACED: Total Open -> Waiting Shipment */}
         <Link href="/orders?status=CREATED" className="block group">
           <Card className="hover:shadow-lg transition-all duration-300 hover:border-gray-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-gray-500 bg-gradient-to-br from-white to-gray-50/50 dark:from-zinc-950 dark:to-gray-950/10">
@@ -90,6 +92,28 @@ export default async function DashboardPage() {
               </div>
               <p className="text-xs text-gray-600/80 dark:text-gray-400/70 mt-1 font-medium">
                 Pedidos criados
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/feeding-orders" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-teal-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-teal-500 bg-gradient-to-br from-white to-teal-50/50 dark:from-zinc-950 dark:to-teal-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Layers className="h-12 w-12 text-teal-500" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-teal-700 dark:text-teal-400">Alimentando</CardTitle>
+              <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-full">
+                <Layers className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold truncate tracking-tight text-teal-950 dark:text-teal-50">
+                {feedingCount}
+              </div>
+              <p className="text-xs text-teal-600/80 dark:text-teal-400/70 mt-1 font-medium">
+                Acumulando valor mínimo
               </p>
             </CardContent>
           </Card>

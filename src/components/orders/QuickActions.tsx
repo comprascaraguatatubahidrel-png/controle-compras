@@ -1,6 +1,6 @@
 "use client"
 
-import { ThumbsUp, Truck, MoreHorizontal } from "lucide-react"
+import { ThumbsUp, Truck, MoreHorizontal, Layers, Send } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -74,11 +74,65 @@ export function QuickActions({ order }: QuickActionsProps) {
         }
     }
 
+    const showFeedingButton = order.status === "FEEDING"
+    const showSendButton = order.status === "CREATED"
     const showApproveButton = order.status === "SENT"
     const showReceiveButton = order.status === "WAITING_ARRIVAL" || order.status === "RECEIVED_PARTIAL"
 
+    const handleMoveToCreated = async () => {
+        setIsLoading(true)
+        try {
+            await updateOrderStatus(order.id, "CREATED", "Movido para Aguardando Envio")
+            toast.success(`Pedido ${order.code} movido para Aguardando Envio!`)
+            router.refresh()
+        } catch (error) {
+            toast.error('Erro ao mover pedido.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleMarkSent = async () => {
+        setIsLoading(true)
+        try {
+            await updateOrderStatus(order.id, "SENT", "Enviado ao fornecedor")
+            toast.success(`Pedido ${order.code} marcado como enviado!`)
+            router.refresh()
+        } catch (error) {
+            toast.error('Erro ao enviar pedido.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="flex items-center gap-1 justify-end">
+            {showFeedingButton && (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 border-teal-500/50 text-teal-600 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-teal-950/20"
+                    onClick={handleMoveToCreated}
+                    disabled={isLoading}
+                >
+                    <Layers className="h-3.5 w-3.5 mr-1" />
+                    Ag. Envio
+                </Button>
+            )}
+
+            {showSendButton && (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 border-blue-500/50 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/20"
+                    onClick={handleMarkSent}
+                    disabled={isLoading}
+                >
+                    <Send className="h-3.5 w-3.5 mr-1" />
+                    Enviar
+                </Button>
+            )}
+
             {showApproveButton && (
                 <Button
                     size="sm"

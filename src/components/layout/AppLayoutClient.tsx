@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ interface MenuCounts {
     refusedInvoices: number
     cancelledOrders: number
     pendingBalance: number
+    feedingOrders: number
 }
 
 interface AppLayoutClientProps {
@@ -86,6 +87,7 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
     const navItems = [
         { href: "/", icon: <LayoutDashboard className="h-4 w-4" />, iconMobile: <LayoutDashboard className="h-5 w-5" />, label: "Dashboard", count: undefined },
         { href: "/orders", icon: <ShoppingCart className="h-4 w-4" />, iconMobile: <ShoppingCart className="h-5 w-5" />, label: "Pedidos", count: counts.orders },
+        { href: "/feeding-orders", icon: <Layers className="h-4 w-4 text-teal-500" />, iconMobile: <Layers className="h-5 w-5 text-teal-500" />, label: "Alimentando", count: counts.feedingOrders },
         { href: "/pending-balance", icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, iconMobile: <AlertTriangle className="h-5 w-5 text-amber-500" />, label: "Saldos Pendentes", count: counts.pendingBalance },
         { href: "/refused-invoices", icon: <FileX className="h-4 w-4" />, iconMobile: <FileX className="h-5 w-5" />, label: "NFs Recusadas", count: counts.refusedInvoices },
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },

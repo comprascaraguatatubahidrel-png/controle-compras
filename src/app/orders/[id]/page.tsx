@@ -16,6 +16,7 @@ import { PartialReceiptsHistory } from "@/components/orders/PartialReceiptsHisto
 import { getPartialReceipts } from "@/actions/partial-receipts"
 
 const statusMap: Record<string, { label: string; className: string }> = {
+    FEEDING: { label: "Alimentando", className: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400" },
     CREATED: { label: "Aguardando Envio", className: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" },
     SENT: { label: "Enviado ao Fornecedor", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
     APPROVED: { label: "Orçamento Aprovado", className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },

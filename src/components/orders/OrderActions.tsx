@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle, Truck, AlertTriangle, ThumbsUp, CalendarClock } from "lucide-react"
+import { CheckCircle, Truck, AlertTriangle, ThumbsUp, CalendarClock, Layers, Send } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
@@ -19,7 +19,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 
 interface OrderActionsProps {
-    status: "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
+    status: "FEEDING" | "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL"
     onStatusChange: (newStatus: any, notes?: string, date?: Date, remainingValue?: string, partialReason?: string) => void
 }
 
@@ -80,6 +80,26 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
 
     return (
         <div className="flex flex-wrap gap-2">
+            {status === "FEEDING" && (
+                <Button onClick={() => {
+                    onStatusChange("CREATED", "Movido para Aguardando Envio")
+                    toast.success('Pedido movido para Aguardando Envio!')
+                }} variant="outline" className="border-gray-600 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900">
+                    <Layers className="mr-2 h-4 w-4" />
+                    Mover para Aguardando Envio
+                </Button>
+            )}
+
+            {status === "CREATED" && (
+                <Button onClick={() => {
+                    onStatusChange("SENT", "Enviado ao fornecedor")
+                    toast.success('Pedido marcado como Enviado!')
+                }} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                    <Send className="mr-2 h-4 w-4" />
+                    Marcar como Enviado
+                </Button>
+            )}
+
             {status === "SENT" && (
                 <>
                     <Button onClick={() => handleAction("MIRROR")} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">

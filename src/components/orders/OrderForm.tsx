@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { Layers, Package } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Check, ChevronsUpDown, Plus, CalendarIcon } from "lucide-react"
@@ -116,15 +117,18 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
     setIsSupplierDialogOpen(false)
   }
 
+  const [initialStatus, setInitialStatus] = useState<'CREATED' | 'FEEDING'>('CREATED')
+
   async function onSubmit(data: OrderFormValues) {
     setIsLoading(true)
     try {
+      const status = mode === 'pendency' ? 'PENDING_ISSUE' : initialStatus
       const newOrder = await createOrder({
         code: data.code,
         supplierId: data.supplierId,
         totalValue: data.totalValue,
         observations: data.observations,
-        initialStatus: mode === 'pendency' ? 'PENDING_ISSUE' : 'CREATED', // Explicitly set CREATED for new orders
+        initialStatus: status as any,
         expectedArrivalDate: data.expectedDate,
         requestedBy: data.requestedBy,
       })
@@ -132,6 +136,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
 
       if (mode === 'pendency') {
         router.push('/pendencies')
+      } else if (initialStatus === 'FEEDING') {
+        router.push('/feeding-orders')
       } else {
         // Redirect to the new order details page to trigger the modal
         router.push(`/orders/${newOrder.id}`)
@@ -152,6 +158,49 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            {/* Status inicial - só aparece no modo order (não pendência) */}
+            {mode === 'order' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Destino do Pedido</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInitialStatus('CREATED')}
+                    className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${initialStatus === 'CREATED'
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-muted hover:border-muted-foreground/30'
+                      }`}
+                  >
+                    <div className={`p-2 rounded-full ${initialStatus === 'CREATED' ? 'bg-gray-200 dark:bg-gray-800' : 'bg-muted'
+                      }`}>
+                      <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">Aguardando Envio</p>
+                      <p className="text-xs text-muted-foreground">Pedido pronto para enviar</p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInitialStatus('FEEDING')}
+                    className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${initialStatus === 'FEEDING'
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-muted hover:border-muted-foreground/30'
+                      }`}
+                  >
+                    <div className={`p-2 rounded-full ${initialStatus === 'FEEDING' ? 'bg-teal-100 dark:bg-teal-900/30' : 'bg-muted'
+                      }`}>
+                      <Layers className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-sm">Alimentando</p>
+                      <p className="text-xs text-muted-foreground">Acumulando valor mínimo</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField

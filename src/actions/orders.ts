@@ -37,11 +37,12 @@ export async function getOrders(search?: string, status?: string, filter?: strin
         )
     }
 
-    // Default: exclude RECEIVED_COMPLETE and CANCELLED unless explicitly filtered
+    // Default: exclude RECEIVED_COMPLETE, CANCELLED and FEEDING unless explicitly filtered
     // Don't exclude if user is specifically filtering by something
     if (!status && !filter && !search && !supplierId && !date) {
         whereClause.push(not(eq(orders.status, 'RECEIVED_COMPLETE')))
         whereClause.push(not(eq(orders.status, 'CANCELLED')))
+        whereClause.push(not(eq(orders.status, 'FEEDING')))
     }
 
     // Fetch orders with supplier relationship
@@ -144,7 +145,7 @@ export async function getOrderById(id: number | string) {
     return order
 }
 
-export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE", expectedArrivalDate?: Date, requestedBy?: string }) {
+export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE" | "FEEDING", expectedArrivalDate?: Date, requestedBy?: string }) {
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
@@ -158,19 +159,25 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     }).returning()
 
     // 2. Add Initial History
+    const notesMap: Record<string, string> = {
+        'FEEDING': 'Pedido criado (Alimentando)',
+        'PENDING_ISSUE': 'Pendência registrada',
+        'SENT': 'Enviado ao fornecedor',
+    }
     await db.insert(orderHistory).values({
         orderId: newOrder.id,
         newStatus: status,
-        notes: status === 'PENDING_ISSUE' ? 'Pendência registrada' : (status === 'SENT' ? 'Enviado ao fornecedor' : 'Pedido criado (Aguardando envio)'),
+        notes: notesMap[status] || 'Pedido criado (Aguardando envio)',
     })
 
     revalidatePath("/orders")
+    revalidatePath("/feeding-orders")
     revalidatePath("/pendencies")
     revalidatePath("/")
     return newOrder
 }
 
-export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string, partialReason?: string) {
+export async function updateOrderStatus(id: number, newStatus: "FEEDING" | "CREATED" | "SENT" | "APPROVED" | "MIRROR_ARRIVED" | "WAITING_ARRIVAL" | "RECEIVED_COMPLETE" | "RECEIVED_PARTIAL" | "PENDING_ISSUE" | "CANCELLED", notes?: string, expectedDate?: Date, remainingValue?: string, partialReason?: string) {
 
     // Get current status for history
     const currentOrder = await db.query.orders.findFirst({
@@ -208,6 +215,7 @@ export async function updateOrderStatus(id: number, newStatus: "CREATED" | "SENT
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+    revalidatePath("/feeding-orders")
     revalidatePath("/pending-balance")
     revalidatePath("/")
 }
@@ -351,4 +359,30 @@ export async function restoreOrder(id: number) {
     revalidatePath("/orders")
     revalidatePath("/cancelled-orders")
     revalidatePath("/")
+}
+
+export async function getFeedingOrders(search?: string, supplierId?: string) {
+    let whereClause: any[] = [eq(orders.status, 'FEEDING')]
+
+    if (supplierId && supplierId !== 'ALL') {
+        whereClause.push(eq(orders.supplierId, parseInt(supplierId)))
+    }
+
+    const results = await db.query.orders.findMany({
+        where: and(...whereClause),
+        with: {
+            supplier: true,
+        },
+        orderBy: [desc(orders.sentDate)]
+    })
+
+    if (search) {
+        const searchLower = search.toLowerCase()
+        return results.filter(order =>
+            order.code.toLowerCase().includes(searchLower) ||
+            order.supplier.name.toLowerCase().includes(searchLower)
+        )
+    }
+
+    return results
 }

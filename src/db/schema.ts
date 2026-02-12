@@ -3,6 +3,7 @@ import { relations } from 'drizzle-orm';
 
 // Enums
 export const orderStatusEnum = pgEnum('order_status', [
+  'FEEDING',           // Alimentando (aguardando valor mínimo)
   'CREATED',           // Pedido Criado (Aguardando envio)
   'SENT',              // Enviado ao Fornecedor
   'APPROVED',          // Pedido Aprovado
