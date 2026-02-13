@@ -12,6 +12,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import { ModeToggle } from "@/components/mode-toggle"
+import { GlobalSearch } from "@/components/layout/GlobalSearch"
 
 interface MenuCounts {
     orders: number
@@ -161,6 +162,7 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
                         </SheetContent>
                     </Sheet>
                     <div className="w-full flex-1">
+                        <GlobalSearch />
                     </div>
                     <ModeToggle />
                     <Button variant="secondary" size="icon" className="rounded-full">

@@ -23,7 +23,7 @@ import { getOrders } from "@/actions/orders"
 import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { OrderFilters } from "@/components/orders/OrderFilters"
-import { ExportButton } from "@/components/orders/ExportButton"
+import { ExportButton } from "@/components/common/ExportButton"
 import { QuickActions } from "@/components/orders/QuickActions"
 import { SortableHeader } from "@/components/orders/SortableHeader"
 import { OrderTableRow } from "@/components/orders/OrderTableRow"
@@ -70,12 +70,33 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
     })
   }
 
+  // Prepare data for export
+  const exportData = orders.map(order => ({
+    code: order.code,
+    supplier: order.supplier.name,
+    status: statusMap[order.status]?.label || order.status,
+    totalValue: order.totalValue || "0,00",
+    sentDate: order.sentDate ? new Date(order.sentDate) : null,
+    expectedArrivalDate: order.expectedArrivalDate ? new Date(order.expectedArrivalDate) : null,
+    observations: order.observations || ""
+  }))
+
+  const exportHeaders = [
+    { key: "code", label: "Código" },
+    { key: "supplier", label: "Fornecedor" },
+    { key: "status", label: "Status" },
+    { key: "totalValue", label: "Valor (R$)" },
+    { key: "sentDate", label: "Data Envio" },
+    { key: "expectedArrivalDate", label: "Previsão Chegada" },
+    { key: "observations", label: "Observações" }
+  ]
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold md:text-2xl">Pedidos de Compra</h1>
         <div className="flex gap-2">
-          <ExportButton orders={orders} />
+          <ExportButton data={exportData} headers={exportHeaders} filename="pedidos_compra" />
           <Button asChild>
             <Link href="/orders/new">
               <Plus className="mr-2 h-4 w-4" /> Novo Pedido

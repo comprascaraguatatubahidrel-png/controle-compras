@@ -15,6 +15,7 @@ import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SupplierFilter } from "@/components/orders/SupplierFilter"
+import { ExportButton } from "@/components/common/ExportButton"
 
 export const dynamic = 'force-dynamic'
 
@@ -39,18 +40,42 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
     const totalOrders = orders.length
     const overdueOrders = orders.filter(order => getDaysOverdue(order.expectedArrivalDate) > 0).length
 
+    // Prepare export data
+    const exportData = orders.map(order => ({
+        code: order.code,
+        supplier: order.supplier.name,
+        originalValue: order.totalValue,
+        pendingValue: order.remainingValue,
+        expectedDate: order.expectedArrivalDate ? new Date(order.expectedArrivalDate) : null,
+        daysOverdue: getDaysOverdue(order.expectedArrivalDate),
+        reason: order.partialReason || ""
+    }))
+
+    const exportHeaders = [
+        { key: "code", label: "Código" },
+        { key: "supplier", label: "Fornecedor" },
+        { key: "originalValue", label: "Valor Original (R$)" },
+        { key: "pendingValue", label: "Saldo Pendente (R$)" },
+        { key: "expectedDate", label: "Data Prevista" },
+        { key: "daysOverdue", label: "Dias Atraso" },
+        { key: "reason", label: "Motivo" }
+    ]
+
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" asChild>
-                    <Link href="/">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                </Button>
-                <div>
-                    <h1 className="text-lg font-semibold md:text-2xl">Saldos Pendentes</h1>
-                    <p className="text-sm text-muted-foreground">Pedidos com saldo a receber</p>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <h1 className="text-lg font-semibold md:text-2xl">Saldos Pendentes</h1>
+                        <p className="text-sm text-muted-foreground">Pedidos com saldo a receber</p>
+                    </div>
                 </div>
+                <ExportButton data={exportData} headers={exportHeaders} filename="saldos_pendentes" />
             </div>
 
             {/* Cards de resumo */}

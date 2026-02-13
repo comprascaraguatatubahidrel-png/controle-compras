@@ -20,16 +20,13 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { getSuppliers } from "@/actions/suppliers"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
-// Mock data
-const suppliers = [
-    { id: 1, name: "Deca", brand: "Deca", active: true, lastOrder: "2024-01-05" },
-    { id: 2, name: "Docol", brand: "Docol", active: true, lastOrder: "2023-12-20" },
-    { id: 3, name: "Tigre", brand: "Tigre", active: true, lastOrder: "2024-01-02" },
-    { id: 4, name: "Amanco", brand: "Amanco", active: false, lastOrder: "2023-10-15" },
-]
+export default async function SuppliersPage() {
+    const suppliers = await getSuppliers()
 
-export default function SuppliersPage() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
@@ -67,41 +64,63 @@ export default function SuppliersPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {suppliers.map((supplier) => (
-                            <TableRow key={supplier.id}>
-                                <TableCell className="font-medium">{supplier.name}</TableCell>
-                                <TableCell>{supplier.brand}</TableCell>
-                                <TableCell>
-                                    <Badge variant={supplier.active ? "outline" : "secondary"}>
-                                        {supplier.active ? "Ativo" : "Inativo"}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>{supplier.lastOrder}</TableCell>
-                                <TableCell className="text-right">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                                <span className="sr-only">Menu</span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                            <DropdownMenuItem>
-                                                <Eye className="mr-2 h-4 w-4" /> Ver Detalhes
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem>
-                                                <Edit className="mr-2 h-4 w-4" /> Editar
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem className="text-destructive">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                        {suppliers.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                    Nenhum fornecedor cadastrado.
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : (
+                            suppliers.map((supplier) => {
+                                // Logic to determine if active based on last order could go here
+                                // For now, let's assume active if they have any orders in the last 6 months?
+                                // Or simplistically always active for MVP
+                                const hasOrders = supplier.orders.length > 0
+                                const lastOrder = hasOrders
+                                    ? supplier.orders.sort((a, b) => new Date(b.sentDate).getTime() - new Date(a.sentDate).getTime())[0]
+                                    : null
+
+                                return (
+                                    <TableRow key={supplier.id}>
+                                        <TableCell className="font-medium">{supplier.name}</TableCell>
+                                        <TableCell>{supplier.brand || '-'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={hasOrders ? "outline" : "secondary"}>
+                                                {hasOrders ? "Ativo" : "Novo"}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {lastOrder
+                                                ? format(new Date(lastOrder.sentDate), "dd/MM/yyyy", { locale: ptBR })
+                                                : "-"}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/suppliers/${supplier.id}`} className="cursor-pointer flex items-center">
+                                                            <Eye className="mr-2 h-4 w-4" /> Ver Detalhes
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/suppliers/${supplier.id}/edit`} className="cursor-pointer flex items-center">
+                                                            <Edit className="mr-2 h-4 w-4" /> Editar
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        )}
                     </TableBody>
                 </Table>
             </div>
