@@ -4,31 +4,25 @@ export const authConfig = {
     pages: {
         signIn: '/login',
     },
+    trustHost: true,
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnDashboard = nextUrl.pathname.startsWith('/');
             const isOnLogin = nextUrl.pathname.startsWith('/login');
 
-            console.log('[CALLBACK] authorized check:', { isLoggedIn, pathname: nextUrl.pathname });
-
             if (isOnLogin) {
-                if (isLoggedIn) {
-                    console.log('[CALLBACK] Redirecting logged in user to home');
-                    return Response.redirect(new URL('/', nextUrl));
-                }
+                if (isLoggedIn) return Response.redirect(new URL('/', nextUrl));
                 return true;
             }
 
             if (isOnDashboard) {
                 if (isLoggedIn) return true;
-                console.log('[CALLBACK] Redirecting unauthenticated user to login');
-                return false; // Redirect unauthenticated users to login page
+                return false;
             }
             return true;
         },
         async session({ session, token }) {
-            console.log('[CALLBACK] session called', { tokenSub: token.sub, tokenStoreId: token.storeId });
             if (token.sub && session.user) {
                 session.user.id = token.sub;
             }
@@ -42,7 +36,6 @@ export const authConfig = {
         },
         async jwt({ token, user }) {
             if (user) {
-                console.log('[CALLBACK] jwt called with user', { id: user.id });
                 // @ts-ignore
                 token.storeId = user.storeId;
                 // @ts-ignore
@@ -51,5 +44,5 @@ export const authConfig = {
             return token;
         }
     },
-    providers: [], // Add providers with an empty array for now
+    providers: [],
 } satisfies NextAuthConfig;
