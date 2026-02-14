@@ -1,14 +1,18 @@
 'use server'
 
 import { db } from "@/db"
-import { orders, orderHistory, partialReceipts } from "@/db/schema"
+import { orders, orderHistory, partialReceipts, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { eq, desc, and, gte, lte, not, or } from "drizzle-orm"
+import { auth } from "@/auth"
 import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    let whereClause: any[] = []
+    const session = await auth();
+    if (!session?.user?.storeId) return [];
+
+    let whereClause: any[] = [eq(orders.storeId, session.user.storeId as number)]
 
     if (status && status !== 'ALL') {
         whereClause.push(eq(orders.status, status as any))
@@ -68,6 +72,9 @@ export async function getOrders(search?: string, status?: string, filter?: strin
 
 export async function getPendencies(search?: string, supplierId?: string, date?: string) {
     const today = new Date()
+    const session = await auth();
+    if (!session?.user?.storeId) return [];
+
     const fifteenDaysAgo = subDays(today, 15)
 
     // Core Pendency Logic
@@ -86,7 +93,10 @@ export async function getPendencies(search?: string, supplierId?: string, date?:
         )
     )
 
-    let whereClause: any[] = [pendencyConditions]
+    let whereClause: any[] = [
+        pendencyConditions,
+        eq(orders.storeId, session.user.storeId as number)
+    ]
 
     // Filters
     if (supplierId && supplierId !== 'ALL') {
@@ -133,8 +143,14 @@ export async function getOrderById(id: number | string) {
     const orderId = Number(id)
     if (isNaN(orderId)) return null;
 
+    const session = await auth();
+    if (!session?.user?.storeId) return null;
+
     const order = await db.query.orders.findFirst({
-        where: eq(orders.id, orderId),
+        where: and(
+            eq(orders.id, orderId),
+            eq(orders.storeId, session.user.storeId as number)
+        ),
         with: {
             supplier: true,
             history: {
@@ -146,6 +162,9 @@ export async function getOrderById(id: number | string) {
 }
 
 export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE" | "FEEDING", expectedArrivalDate?: Date, requestedBy?: string }) {
+    const session = await auth();
+    if (!session?.user?.storeId) throw new Error("Unauthorized");
+
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
@@ -156,6 +175,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
         status: status,
         expectedArrivalDate: data.expectedArrivalDate,
         requestedBy: data.requestedBy,
+        storeId: session.user.storeId as number
     }).returning()
 
     // 2. Add Initial History
@@ -362,7 +382,13 @@ export async function restoreOrder(id: number) {
 }
 
 export async function getFeedingOrders(search?: string, supplierId?: string) {
-    let whereClause: any[] = [eq(orders.status, 'FEEDING')]
+    const session = await auth();
+    if (!session?.user?.storeId) return [];
+
+    let whereClause: any[] = [
+        eq(orders.status, 'FEEDING'),
+        eq(orders.storeId, session.user.storeId as number)
+    ]
 
     if (supplierId && supplierId !== 'ALL') {
         whereClause.push(eq(orders.supplierId, parseInt(supplierId)))

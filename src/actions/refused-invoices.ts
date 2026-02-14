@@ -4,9 +4,14 @@ import { db } from "@/db"
 import { refusedInvoices } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { eq, desc, and, like } from "drizzle-orm"
+import { auth } from "@/auth"
 
 export async function getRefusedInvoices(search?: string) {
+    const session = await auth();
+    if (!session?.user?.storeId) return [];
+
     const results = await db.query.refusedInvoices.findMany({
+        where: eq(refusedInvoices.storeId, session.user.storeId as number),
         with: {
             supplier: true,
         },
@@ -34,6 +39,9 @@ export async function createRefusedInvoice(data: {
     boletoNumber?: string,
     imageUrl?: string
 }) {
+    const session = await auth();
+    if (!session?.user?.storeId) throw new Error("Unauthorized");
+
     await db.insert(refusedInvoices).values({
         invoiceNumber: data.invoiceNumber,
         value: data.value,
@@ -42,6 +50,7 @@ export async function createRefusedInvoice(data: {
         reason: data.reason,
         boletoNumber: data.boletoNumber,
         imageUrl: data.imageUrl,
+        storeId: session.user.storeId as number
     })
 
     revalidatePath("/refused-invoices")

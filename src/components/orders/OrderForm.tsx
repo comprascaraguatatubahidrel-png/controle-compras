@@ -54,6 +54,7 @@ import {
 import { SupplierForm } from "@/components/suppliers/SupplierForm"
 import { createOrder } from "@/actions/orders"
 import { getSuppliers, createSupplier } from "@/actions/suppliers"
+import { getStoreUsers } from "@/actions/users"
 import { cn } from "@/lib/utils"
 
 const orderSchema = z.object({
@@ -80,8 +81,9 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
 
   const [open, setOpen] = useState(false)
   const [isCustomRequestor, setIsCustomRequestor] = useState(false)
+  const [storeUsers, setStoreUsers] = useState<{ id: number, name: string }[]>([])
 
-  const predefinedRequestors = ["Thiago", "Fernando", "Junior", "Marcelo", "Sophia"]
+  // const predefinedRequestors = ["Thiago", "Fernando", "Junior", "Marcelo", "Sophia"]
 
   const title = mode === 'pendency' ? 'Nova Pendência' : 'Novo Pedido'
   const redirectPath = mode === 'pendency' ? '/pendencies' : '/orders'
@@ -102,6 +104,9 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
   useEffect(() => {
     getSuppliers().then(data => {
       setSuppliers(data)
+    })
+    getStoreUsers().then(data => {
+      setStoreUsers(data)
     })
   }, [])
 
@@ -168,8 +173,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                     type="button"
                     onClick={() => setInitialStatus('CREATED')}
                     className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${initialStatus === 'CREATED'
-                        ? 'border-primary bg-primary/5 shadow-sm'
-                        : 'border-muted hover:border-muted-foreground/30'
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'border-muted hover:border-muted-foreground/30'
                       }`}
                   >
                     <div className={`p-2 rounded-full ${initialStatus === 'CREATED' ? 'bg-gray-200 dark:bg-gray-800' : 'bg-muted'
@@ -185,8 +190,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                     type="button"
                     onClick={() => setInitialStatus('FEEDING')}
                     className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${initialStatus === 'FEEDING'
-                        ? 'border-primary bg-primary/5 shadow-sm'
-                        : 'border-muted hover:border-muted-foreground/30'
+                      ? 'border-primary bg-primary/5 shadow-sm'
+                      : 'border-muted hover:border-muted-foreground/30'
                       }`}
                   >
                     <div className={`p-2 rounded-full ${initialStatus === 'FEEDING' ? 'bg-teal-100 dark:bg-teal-900/30' : 'bg-muted'
@@ -344,7 +349,7 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                               field.onChange(val)
                             }
                           }}
-                          defaultValue={predefinedRequestors.includes(field.value) ? field.value : (field.value ? 'OTHER' : undefined)}
+                          defaultValue={storeUsers.some(u => u.name === field.value) ? field.value : (field.value ? 'OTHER' : undefined)}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -352,8 +357,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {predefinedRequestors.map((name) => (
-                              <SelectItem key={name} value={name}>{name}</SelectItem>
+                            {storeUsers.map((user) => (
+                              <SelectItem key={user.id} value={user.name}>{user.name}</SelectItem>
                             ))}
                             <SelectItem value="OTHER">Outro (Digitar nome)</SelectItem>
                           </SelectContent>

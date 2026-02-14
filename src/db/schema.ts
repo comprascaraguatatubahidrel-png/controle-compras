@@ -11,17 +11,39 @@ export const orderStatusEnum = pgEnum('order_status', [
   'WAITING_ARRIVAL',   // Aguardando Chegada
   'RECEIVED_COMPLETE', // Recebido Completo
   'RECEIVED_PARTIAL',  // Recebido com Saldo
-  'PENDING_ISSUE',      // Pendência
+  'PENDING_ISSUE',     // Pendência
   'CANCELLED'          // Cancelado
 ]);
 
+export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'MANAGER', 'EMPLOYEE']);
+
 // Tables
+
+export const stores = pgTable('stores', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  password: text('password').notNull(), // Hashed
+  role: userRoleEnum('role').default('EMPLOYEE').notNull(),
+  storeId: integer('store_id').references(() => stores.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
 
 export const suppliers = pgTable('suppliers', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   brand: text('brand'),
   observations: text('observations'),
+  storeId: integer('store_id').references(() => stores.id), // Nullable for migration
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -41,6 +63,7 @@ export const refusedInvoices = pgTable('refused_invoices', {
   invoiceNumber: text('invoice_number').notNull(),
   value: decimal('value', { precision: 10, scale: 2 }).notNull(),
   supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
+  storeId: integer('store_id').references(() => stores.id), // Nullable for migration
   returnDate: timestamp('return_date').notNull(),
   reason: text('reason').notNull(),
   boletoNumber: text('boleto_number'),
@@ -50,20 +73,21 @@ export const refusedInvoices = pgTable('refused_invoices', {
 
 export const orders = pgTable('orders', {
   id: serial('id').primaryKey(),
-  code: text('code').notNull().unique(), // Código do pedido systema interno
+  code: text('code').notNull(), // Validar unicidade por loja via lógica de aplicação ou índice composto futuro
   supplierId: integer('supplier_id').references(() => suppliers.id).notNull(),
+  storeId: integer('store_id').references(() => stores.id), // Nullable for migration
   totalValue: decimal('total_value', { precision: 10, scale: 2 }),
   remainingValue: decimal('remaining_value', { precision: 10, scale: 2 }),
   status: orderStatusEnum('status').default('CREATED').notNull(),
   sentDate: timestamp('sent_date').defaultNow().notNull(),
-  expectedArrivalDate: timestamp('expected_arrival_date'), // Data combinada
+  expectedArrivalDate: timestamp('expected_arrival_date'),
   observations: text('observations'),
   lastUpdate: timestamp('last_update').defaultNow().notNull(),
   cancellationReason: text('cancellation_reason'),
   cancelledBy: text('cancelled_by'),
-  checked: boolean('checked').default(false).notNull(), // Conferido pelo gerente
-  requestedBy: text('requested_by'), // Nome de quem fez o pedido
-  partialReason: text('partial_reason'), // Motivo do saldo pendente
+  checked: boolean('checked').default(false).notNull(),
+  requestedBy: text('requested_by'),
+  partialReason: text('partial_reason'),
 });
 
 export const orderHistory = pgTable('order_history', {
@@ -72,10 +96,9 @@ export const orderHistory = pgTable('order_history', {
   previousStatus: orderStatusEnum('previous_status'),
   newStatus: orderStatusEnum('new_status').notNull(),
   changeDate: timestamp('change_date').defaultNow().notNull(),
-  notes: text('notes'), // Justificativa ou contexto da mudança
+  notes: text('notes'),
 });
 
-// Histórico de recebimentos parciais
 export const partialReceipts = pgTable('partial_receipts', {
   id: serial('id').primaryKey(),
   orderId: integer('order_id').references(() => orders.id).notNull(),
@@ -88,13 +111,35 @@ export const partialReceipts = pgTable('partial_receipts', {
 
 // Relations
 
-export const suppliersRelations = relations(suppliers, ({ many }) => ({
+export const storesRelations = relations(stores, ({ many }) => ({
+  users: many(users),
+  orders: many(orders),
+  suppliers: many(suppliers),
+  refusedInvoices: many(refusedInvoices),
+}));
+
+export const usersRelations = relations(users, ({ one }) => ({
+  store: one(stores, {
+    fields: [users.storeId],
+    references: [stores.id],
+  }),
+}));
+
+export const suppliersRelations = relations(suppliers, ({ many, one }) => ({
+  store: one(stores, {
+    fields: [suppliers.storeId],
+    references: [stores.id],
+  }),
   representatives: many(representatives),
   orders: many(orders),
   refusedInvoices: many(refusedInvoices),
 }));
 
 export const refusedInvoicesRelations = relations(refusedInvoices, ({ one }) => ({
+  store: one(stores, {
+    fields: [refusedInvoices.storeId],
+    references: [stores.id],
+  }),
   supplier: one(suppliers, {
     fields: [refusedInvoices.supplierId],
     references: [suppliers.id],
@@ -109,6 +154,10 @@ export const representativesRelations = relations(representatives, ({ one }) => 
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
+  store: one(stores, {
+    fields: [orders.storeId],
+    references: [stores.id],
+  }),
   supplier: one(suppliers, {
     fields: [orders.supplierId],
     references: [suppliers.id],

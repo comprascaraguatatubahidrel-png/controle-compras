@@ -5,14 +5,21 @@ import { representatives, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { eq, desc } from "drizzle-orm"
 
+import { auth } from "@/auth"
+
 export async function getRepresentatives() {
+    const session = await auth();
+    if (!session?.user?.storeId) return [];
+
     const results = await db.query.representatives.findMany({
         with: {
             supplier: true,
         },
         orderBy: [desc(representatives.createdAt)]
     })
-    return results
+
+    // Filter by storeId (via supplier)
+    return results.filter(rep => rep.supplier.storeId === session.user.storeId)
 }
 
 export async function getRepresentativeById(id: number | string) {
