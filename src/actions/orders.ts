@@ -9,10 +9,10 @@ import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    // const session = await auth();
-    // if (!session?.user?.storeId) return [];
+    const session = await auth();
+    const storeId = session?.user?.storeId || 1; // Fallback to Matriz
 
-    let whereClause: any[] = [] // Removed store filter [eq(orders.storeId, session.user.storeId as number)]
+    let whereClause: any[] = [eq(orders.storeId, storeId as number)]
 
     if (status && status !== 'ALL') {
         whereClause.push(eq(orders.status, status as any))
@@ -72,8 +72,8 @@ export async function getOrders(search?: string, status?: string, filter?: strin
 
 export async function getPendencies(search?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    // const session = await auth();
-    // if (!session?.user?.storeId) return [];
+    const session = await auth();
+    const storeId = session?.user?.storeId || 1;
 
     const fifteenDaysAgo = subDays(today, 15)
 
@@ -94,7 +94,8 @@ export async function getPendencies(search?: string, supplierId?: string, date?:
     )
 
     let whereClause: any[] = [
-        pendencyConditions
+        pendencyConditions,
+        eq(orders.storeId, storeId as number)
     ]
 
     // Filters
@@ -142,11 +143,14 @@ export async function getOrderById(id: number | string) {
     const orderId = Number(id)
     if (isNaN(orderId)) return null;
 
-    // const session = await auth();
-    // if (!session?.user?.storeId) return null;
+    const session = await auth();
+    const storeId = session?.user?.storeId || 1;
 
     const order = await db.query.orders.findFirst({
-        where: eq(orders.id, orderId),
+        where: and(
+            eq(orders.id, orderId),
+            eq(orders.storeId, storeId as number)
+        ),
         with: {
             supplier: true,
             history: {
@@ -159,7 +163,7 @@ export async function getOrderById(id: number | string) {
 
 export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE" | "FEEDING", expectedArrivalDate?: Date, requestedBy?: string }) {
     const session = await auth();
-    if (!session?.user?.storeId) throw new Error("Unauthorized");
+    const storeId = session?.user?.storeId || 1; // Fallback to ensure service doesn't stop
 
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
@@ -171,7 +175,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
         status: status,
         expectedArrivalDate: data.expectedArrivalDate,
         requestedBy: data.requestedBy,
-        // storeId: session.user.storeId as number
+        storeId: storeId as number
     }).returning()
 
     // 2. Add Initial History
@@ -378,11 +382,12 @@ export async function restoreOrder(id: number) {
 }
 
 export async function getFeedingOrders(search?: string, supplierId?: string) {
-    // const session = await auth();
-    // if (!session?.user?.storeId) return [];
+    const session = await auth();
+    const storeId = session?.user?.storeId || 1;
 
     let whereClause: any[] = [
-        eq(orders.status, 'FEEDING')
+        eq(orders.status, 'FEEDING'),
+        eq(orders.storeId, storeId as number)
     ]
 
     if (supplierId && supplierId !== 'ALL') {
