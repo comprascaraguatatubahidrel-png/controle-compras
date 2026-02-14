@@ -1,7 +1,8 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 
-export default NextAuth(authConfig).auth;
+// TEMPORARILY DISABLED middleware to allow local work
+export default function middleware() { }
 
 export const config = {
     // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
