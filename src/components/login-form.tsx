@@ -15,13 +15,13 @@ export function LoginForm() {
         <Card className="w-full">
             <CardHeader>
                 <CardTitle>Login</CardTitle>
-                <CardDescription>Entre com suas credenciais para acessar.</CardDescription>
+                <CardDescription>Entre com seu usuário e senha.</CardDescription>
             </CardHeader>
             <form action={dispatch}>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" name="email" placeholder="m@example.com" required />
+                        <Label htmlFor="email">Usuário</Label>
+                        <Input id="email" type="text" name="email" placeholder="usuario" required />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="password">Senha</Label>
