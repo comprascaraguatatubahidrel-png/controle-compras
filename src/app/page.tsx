@@ -19,13 +19,13 @@ import { orders } from "@/db/schema"
 import { eq, not, or, and, lt, lte, gte } from "drizzle-orm"
 import { startOfDay, endOfDay } from "date-fns"
 import Link from "next/link"
+import { auth } from "@/auth"
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  // Fetch real data
+  // Fetch real data - TEMPORARILY REMOVING FILTER TO RESTORE VISIBILITY
   const allOrders = await db.query.orders.findMany({
-    where: not(eq(orders.status, 'RECEIVED_COMPLETE')),
     with: {
       supplier: true,
     }

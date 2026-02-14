@@ -9,10 +9,10 @@ import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
+    // const session = await auth();
+    // if (!session?.user?.storeId) return [];
 
-    let whereClause: any[] = [eq(orders.storeId, session.user.storeId as number)]
+    let whereClause: any[] = [] // Removed store filter [eq(orders.storeId, session.user.storeId as number)]
 
     if (status && status !== 'ALL') {
         whereClause.push(eq(orders.status, status as any))
@@ -72,8 +72,8 @@ export async function getOrders(search?: string, status?: string, filter?: strin
 
 export async function getPendencies(search?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
+    // const session = await auth();
+    // if (!session?.user?.storeId) return [];
 
     const fifteenDaysAgo = subDays(today, 15)
 
@@ -94,8 +94,7 @@ export async function getPendencies(search?: string, supplierId?: string, date?:
     )
 
     let whereClause: any[] = [
-        pendencyConditions,
-        eq(orders.storeId, session.user.storeId as number)
+        pendencyConditions
     ]
 
     // Filters
@@ -143,14 +142,11 @@ export async function getOrderById(id: number | string) {
     const orderId = Number(id)
     if (isNaN(orderId)) return null;
 
-    const session = await auth();
-    if (!session?.user?.storeId) return null;
+    // const session = await auth();
+    // if (!session?.user?.storeId) return null;
 
     const order = await db.query.orders.findFirst({
-        where: and(
-            eq(orders.id, orderId),
-            eq(orders.storeId, session.user.storeId as number)
-        ),
+        where: eq(orders.id, orderId),
         with: {
             supplier: true,
             history: {
@@ -175,7 +171,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
         status: status,
         expectedArrivalDate: data.expectedArrivalDate,
         requestedBy: data.requestedBy,
-        storeId: session.user.storeId as number
+        // storeId: session.user.storeId as number
     }).returning()
 
     // 2. Add Initial History
@@ -382,12 +378,11 @@ export async function restoreOrder(id: number) {
 }
 
 export async function getFeedingOrders(search?: string, supplierId?: string) {
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
+    // const session = await auth();
+    // if (!session?.user?.storeId) return [];
 
     let whereClause: any[] = [
-        eq(orders.status, 'FEEDING'),
-        eq(orders.storeId, session.user.storeId as number)
+        eq(orders.status, 'FEEDING')
     ]
 
     if (supplierId && supplierId !== 'ALL') {

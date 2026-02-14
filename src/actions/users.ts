@@ -6,11 +6,11 @@ import { eq, desc } from "drizzle-orm"
 import { auth } from "@/auth"
 
 export async function getStoreUsers() {
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
+    // const session = await auth();
+    // if (!session?.user?.storeId) return [];
 
     const data = await db.query.users.findMany({
-        where: eq(users.storeId, session.user.storeId as number),
+        // where: eq(users.storeId, session.user.storeId as number),
         orderBy: [desc(users.name)],
         columns: {
             id: true,

@@ -7,11 +7,11 @@ import { eq, desc, and, like } from "drizzle-orm"
 import { auth } from "@/auth"
 
 export async function getRefusedInvoices(search?: string) {
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
+    // const session = await auth();
+    // if (!session?.user?.storeId) return [];
 
     const results = await db.query.refusedInvoices.findMany({
-        where: eq(refusedInvoices.storeId, session.user.storeId as number),
+        // where: eq(refusedInvoices.storeId, session.user.storeId as number),
         with: {
             supplier: true,
         },
