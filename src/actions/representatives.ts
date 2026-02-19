@@ -8,9 +8,6 @@ import { eq, desc } from "drizzle-orm"
 import { auth } from "@/auth"
 
 export async function getRepresentatives() {
-    const session = await auth();
-    if (!session?.user?.storeId) return [];
-
     const results = await db.query.representatives.findMany({
         with: {
             supplier: true,
@@ -18,8 +15,7 @@ export async function getRepresentatives() {
         orderBy: [desc(representatives.createdAt)]
     })
 
-    // Filter by storeId (via supplier)
-    return results.filter(rep => rep.supplier.storeId === session.user.storeId)
+    return results
 }
 
 export async function getRepresentativeById(id: number | string) {

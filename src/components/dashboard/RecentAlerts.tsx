@@ -10,6 +10,9 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
     today.setHours(0, 0, 0, 0)
 
     const alerts = orders.filter(o => {
+        // Skip finalized orders — never show as alerts
+        if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
+
         // Delayed arrival
         if (o.expectedArrivalDate && new Date(o.expectedArrivalDate) < today) return true
 
@@ -24,6 +27,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
     }).sort((a, b) => Number(b.totalValue || 0) - Number(a.totalValue || 0))
 
     const arrivingToday = orders.filter(o => {
+        if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
         if (!o.expectedArrivalDate) return false
         const expected = new Date(o.expectedArrivalDate)
         expected.setHours(0, 0, 0, 0)

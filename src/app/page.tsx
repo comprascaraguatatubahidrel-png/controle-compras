@@ -24,7 +24,7 @@ import { auth } from "@/auth"
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  // Fetch real data - TEMPORARILY REMOVING FILTER TO RESTORE VISIBILITY
+  // Fetch real data
   const allOrders = await db.query.orders.findMany({
     with: {
       supplier: true,
@@ -50,7 +50,10 @@ export default async function DashboardPage() {
   }).length
 
   const alertsCount = allOrders.filter(o => {
-    // Alert 1: Espelho atrasado (SENT > 2 days)
+    // Skip finalized orders
+    if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
+
+    // Alert 1: Espelho atrasado (SENT > 3 days)
     if (o.status === 'SENT') {
       const threeDaysAgo = new Date()
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)

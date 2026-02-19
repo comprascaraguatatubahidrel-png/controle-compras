@@ -3,15 +3,10 @@
 import { db } from "@/db"
 import { refusedInvoices } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc, and, like } from "drizzle-orm"
-import { auth } from "@/auth"
+import { eq, desc } from "drizzle-orm"
 
 export async function getRefusedInvoices(search?: string) {
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1;
-
     const results = await db.query.refusedInvoices.findMany({
-        where: eq(refusedInvoices.storeId, storeId as number),
         with: {
             supplier: true,
         },
@@ -39,9 +34,6 @@ export async function createRefusedInvoice(data: {
     boletoNumber?: string,
     imageUrl?: string
 }) {
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1;
-
     await db.insert(refusedInvoices).values({
         invoiceNumber: data.invoiceNumber,
         value: data.value,
@@ -50,7 +42,6 @@ export async function createRefusedInvoice(data: {
         reason: data.reason,
         boletoNumber: data.boletoNumber,
         imageUrl: data.imageUrl,
-        storeId: storeId as number
     })
 
     revalidatePath("/refused-invoices")

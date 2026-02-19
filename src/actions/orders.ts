@@ -4,15 +4,12 @@ import { db } from "@/db"
 import { orders, orderHistory, partialReceipts, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { eq, desc, and, gte, lte, not, or } from "drizzle-orm"
-import { auth } from "@/auth"
 import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1; // Fallback to Matriz
 
-    let whereClause: any[] = [eq(orders.storeId, storeId as number)]
+    let whereClause: any[] = []
 
     if (status && status !== 'ALL') {
         whereClause.push(eq(orders.status, status as any))
@@ -72,8 +69,6 @@ export async function getOrders(search?: string, status?: string, filter?: strin
 
 export async function getPendencies(search?: string, supplierId?: string, date?: string) {
     const today = new Date()
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1;
 
     const fifteenDaysAgo = subDays(today, 15)
 
@@ -93,10 +88,7 @@ export async function getPendencies(search?: string, supplierId?: string, date?:
         )
     )
 
-    let whereClause: any[] = [
-        pendencyConditions,
-        eq(orders.storeId, storeId as number)
-    ]
+    let whereClause: any[] = [pendencyConditions]
 
     // Filters
     if (supplierId && supplierId !== 'ALL') {
@@ -105,13 +97,6 @@ export async function getPendencies(search?: string, supplierId?: string, date?:
 
     if (date) {
         const filterDate = new Date(date)
-        // For pendencies, date filter might mean "Created On" or "Expected On". 
-        // Let's assume user wants to filter by Sent Date usually, or Created Date.
-        // But for consistency with getOrders, let's use expectedArrivalDate IF it exists, otherwise SentDate might be better?
-        // Actually, the UI for filter just sends 'date'.
-        // Let's stick to modifying the query to check if ANY of the date fields match, or just specific one.
-        // Given the context, usually people filter by when it was supposed to arrive or when it was sent.
-        // Let's try to filter by sentDate for now as it's always present.
         whereClause.push(
             and(
                 gte(orders.sentDate, startOfDay(filterDate)),
@@ -143,14 +128,8 @@ export async function getOrderById(id: number | string) {
     const orderId = Number(id)
     if (isNaN(orderId)) return null;
 
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1;
-
     const order = await db.query.orders.findFirst({
-        where: and(
-            eq(orders.id, orderId),
-            eq(orders.storeId, storeId as number)
-        ),
+        where: eq(orders.id, orderId),
         with: {
             supplier: true,
             history: {
@@ -162,9 +141,6 @@ export async function getOrderById(id: number | string) {
 }
 
 export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE" | "FEEDING", expectedArrivalDate?: Date, requestedBy?: string }) {
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1; // Fallback to ensure service doesn't stop
-
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
@@ -175,7 +151,6 @@ export async function createOrder(data: { code: string, supplierId: string, tota
         status: status,
         expectedArrivalDate: data.expectedArrivalDate,
         requestedBy: data.requestedBy,
-        storeId: storeId as number
     }).returning()
 
     // 2. Add Initial History
@@ -334,15 +309,8 @@ export async function toggleOrderChecked(id: number, isChecked: boolean) {
 }
 
 export async function deleteOrder(id: number) {
-    // 1. Delete history first due to foreign key constraints if they aren't CASCADE
-    // Actually in schema.ts they don't have onDelete: 'cascade' explicitly mentioned 
-    // but Drizzle might handle it if configured. Looking at schema.ts, it's just references().
     await db.delete(orderHistory).where(eq(orderHistory.orderId, id))
-
-    // 2. Delete partial receipts if any
     await db.delete(partialReceipts).where(eq(partialReceipts.orderId, id))
-
-    // 3. Delete the order
     await db.delete(orders).where(eq(orders.id, id))
 
     revalidatePath("/orders")
@@ -382,12 +350,8 @@ export async function restoreOrder(id: number) {
 }
 
 export async function getFeedingOrders(search?: string, supplierId?: string) {
-    const session = await auth();
-    const storeId = session?.user?.storeId || 1;
-
     let whereClause: any[] = [
         eq(orders.status, 'FEEDING'),
-        eq(orders.storeId, storeId as number)
     ]
 
     if (supplierId && supplierId !== 'ALL') {
