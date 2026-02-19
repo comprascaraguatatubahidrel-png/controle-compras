@@ -54,7 +54,7 @@ import {
 import { SupplierForm } from "@/components/suppliers/SupplierForm"
 import { createOrder } from "@/actions/orders"
 import { getSuppliers, createSupplier } from "@/actions/suppliers"
-import { getStoreUsers } from "@/actions/users"
+
 import { cn } from "@/lib/utils"
 
 const orderSchema = z.object({
@@ -81,9 +81,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
 
   const [open, setOpen] = useState(false)
   const [isCustomRequestor, setIsCustomRequestor] = useState(false)
-  const [storeUsers, setStoreUsers] = useState<{ id: number, name: string }[]>([])
 
-  // const predefinedRequestors = ["Thiago", "Fernando", "Junior", "Marcelo", "Sophia"]
+  const predefinedRequestors = ["Junior", "Thiago", "Fernando", "Marcelo", "Sophia"]
 
   const title = mode === 'pendency' ? 'Nova Pendência' : 'Novo Pedido'
   const redirectPath = mode === 'pendency' ? '/pendencies' : '/orders'
@@ -104,9 +103,6 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
   useEffect(() => {
     getSuppliers().then(data => {
       setSuppliers(data)
-    })
-    getStoreUsers().then(data => {
-      setStoreUsers(data)
     })
   }, [])
 
@@ -349,7 +345,7 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                               field.onChange(val)
                             }
                           }}
-                          defaultValue={storeUsers.some(u => u.name === field.value) ? field.value : (field.value ? 'OTHER' : undefined)}
+                          defaultValue={predefinedRequestors.includes(field.value) ? field.value : (field.value ? 'OTHER' : undefined)}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -357,8 +353,8 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {storeUsers.map((user) => (
-                              <SelectItem key={user.id} value={user.name}>{user.name}</SelectItem>
+                            {predefinedRequestors.map((name) => (
+                              <SelectItem key={name} value={name}>{name}</SelectItem>
                             ))}
                             <SelectItem value="OTHER">Outro (Digitar nome)</SelectItem>
                           </SelectContent>
