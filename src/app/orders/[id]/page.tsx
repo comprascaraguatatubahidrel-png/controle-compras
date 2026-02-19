@@ -35,8 +35,10 @@ import { OrderCheckButton } from "@/components/orders/OrderCheckButton"
 import { OrderActionsWrapper } from "@/components/orders/OrderActionsWrapper"
 import { OrderObservations } from "@/components/orders/OrderObservations"
 
-export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderDetailsPage({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ back?: string }> }) {
     const { id } = await params
+    const { back } = await searchParams
+    const backUrl = back ? decodeURIComponent(back) : '/orders'
     const order = await getOrderById(id)
 
     if (!order) {
@@ -56,7 +58,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b pb-4">
                 <div className="flex items-center gap-4 flex-1">
                     <Button variant="outline" size="icon" asChild className="shrink-0">
-                        <Link href="/orders">
+                        <Link href={backUrl}>
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>

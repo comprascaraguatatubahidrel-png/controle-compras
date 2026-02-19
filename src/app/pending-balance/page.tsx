@@ -153,7 +153,7 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
                                 return (
                                     <TableRow key={order.id} className={isOverdue ? "bg-red-50/50 dark:bg-red-950/10" : ""}>
                                         <TableCell className="font-medium">
-                                            <Link href={`/orders/${order.id}`} className="hover:underline text-primary">
+                                            <Link href={`/orders/${order.id}?back=${encodeURIComponent('/pending-balance')}`} className="hover:underline text-primary">
                                                 {order.code}
                                             </Link>
                                         </TableCell>

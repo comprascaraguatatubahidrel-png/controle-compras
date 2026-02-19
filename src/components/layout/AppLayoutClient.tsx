@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,9 @@ import { GlobalSearch } from "@/components/layout/GlobalSearch"
 
 interface MenuCounts {
     orders: number
+    waitingShipment: number
+    waitingMirror: number
+    arrivingToday: number
     refusedInvoices: number
     cancelledOrders: number
     pendingBalance: number
@@ -87,8 +90,11 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
 
     const navItems = [
         { href: "/", icon: <LayoutDashboard className="h-4 w-4" />, iconMobile: <LayoutDashboard className="h-5 w-5" />, label: "Dashboard", count: undefined },
-        { href: "/orders", icon: <ShoppingCart className="h-4 w-4" />, iconMobile: <ShoppingCart className="h-5 w-5" />, label: "Pedidos", count: counts.orders },
+        { href: "/orders", icon: <ShoppingCart className="h-4 w-4" />, iconMobile: <ShoppingCart className="h-5 w-5" />, label: "Todos Pedidos", count: counts.orders },
+        { href: "/waiting-shipment", icon: <Package className="h-4 w-4 text-gray-500" />, iconMobile: <Package className="h-5 w-5 text-gray-500" />, label: "Aguardando Envio", count: counts.waitingShipment },
         { href: "/feeding-orders", icon: <Layers className="h-4 w-4 text-teal-500" />, iconMobile: <Layers className="h-5 w-5 text-teal-500" />, label: "Alimentando", count: counts.feedingOrders },
+        { href: "/waiting-mirror", icon: <Clock className="h-4 w-4 text-blue-500" />, iconMobile: <Clock className="h-5 w-5 text-blue-500" />, label: "Aguardando Espelho", count: counts.waitingMirror },
+        { href: "/arriving-today", icon: <Package className="h-4 w-4 text-purple-500" />, iconMobile: <Package className="h-5 w-5 text-purple-500" />, label: "Chega Hoje", count: counts.arrivingToday },
         { href: "/pending-balance", icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, iconMobile: <AlertTriangle className="h-5 w-5 text-amber-500" />, label: "Saldos Pendentes", count: counts.pendingBalance },
         { href: "/refused-invoices", icon: <FileX className="h-4 w-4" />, iconMobile: <FileX className="h-5 w-5" />, label: "NFs Recusadas", count: counts.refusedInvoices },
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },

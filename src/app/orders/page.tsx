@@ -139,7 +139,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
               </TableRow>
             ) : (
               orders.map((order) => (
-                <OrderTableRow key={order.id} orderId={order.id}>
+                <OrderTableRow key={order.id} orderId={order.id} backUrl="/orders">
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       <span className="hover:underline">

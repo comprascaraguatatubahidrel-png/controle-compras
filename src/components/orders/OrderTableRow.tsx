@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation"
 interface OrderTableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
     orderId: number
     children: React.ReactNode
+    backUrl?: string
 }
 
-export function OrderTableRow({ orderId, children, className, ...props }: OrderTableRowProps) {
+export function OrderTableRow({ orderId, children, className, backUrl, ...props }: OrderTableRowProps) {
     const router = useRouter()
 
     return (
@@ -24,7 +25,10 @@ export function OrderTableRow({ orderId, children, className, ...props }: OrderT
                 ) {
                     return
                 }
-                router.push(`/orders/${orderId}`)
+                const destination = backUrl
+                    ? `/orders/${orderId}?back=${encodeURIComponent(backUrl)}`
+                    : `/orders/${orderId}`
+                router.push(destination)
             }}
             {...props}
         >

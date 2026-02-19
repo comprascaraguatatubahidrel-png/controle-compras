@@ -78,7 +78,7 @@ export default async function DashboardPage() {
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
         {/* REPLACED: Total Open -> Waiting Shipment */}
-        <Link href="/orders?status=CREATED" className="block group">
+        <Link href="/waiting-shipment" className="block group">
           <Card className="hover:shadow-lg transition-all duration-300 hover:border-gray-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-gray-500 bg-gradient-to-br from-white to-gray-50/50 dark:from-zinc-950 dark:to-gray-950/10">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Package className="h-12 w-12 text-gray-500" />
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/orders?status=SENT" className="block group">
+        <Link href="/waiting-mirror" className="block group">
           <Card className="hover:shadow-lg transition-all duration-300 hover:border-blue-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-blue-500 bg-gradient-to-br from-white to-blue-50/50 dark:from-zinc-950 dark:to-blue-950/10">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Clock className="h-12 w-12 text-blue-500" />
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/orders?filter=arriving_today" className="block group">
+        <Link href="/arriving-today" className="block group">
           <Card className="hover:shadow-lg transition-all duration-300 hover:border-purple-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-purple-500 bg-gradient-to-br from-white to-purple-50/50 dark:from-zinc-950 dark:to-purple-950/10">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Package className="h-12 w-12 text-purple-500" />

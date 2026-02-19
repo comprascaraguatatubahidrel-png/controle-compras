@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Plus, CheckCircle, Layers } from "lucide-react"
+import { Plus, CheckCircle, Package } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,28 +11,30 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { getFeedingOrders } from "@/actions/orders"
+import { getOrders } from "@/actions/orders"
 import { getSuppliers } from "@/actions/suppliers"
 import { OrderSearch } from "@/components/orders/OrderSearch"
 import { QuickActions } from "@/components/orders/QuickActions"
 import { OrderTableRow } from "@/components/orders/OrderTableRow"
+import { SupplierFilter } from "@/components/orders/SupplierFilter"
 
 export const dynamic = 'force-dynamic'
 
-export default async function FeedingOrdersPage({ searchParams }: { searchParams: Promise<{ q?: string, supplierId?: string }> }) {
+export default async function WaitingShipmentPage({ searchParams }: { searchParams: Promise<{ q?: string, supplierId?: string }> }) {
     const { q, supplierId } = await searchParams
-    const orders = await getFeedingOrders(q, supplierId)
+    const orders = await getOrders(q, 'CREATED', undefined, supplierId)
+    const suppliers = await getSuppliers()
 
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-teal-100 dark:bg-teal-900/30 rounded-full">
-                        <Layers className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                    <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full">
+                        <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     </div>
                     <div>
-                        <h1 className="text-lg font-semibold md:text-2xl">Pedidos Alimentando</h1>
-                        <p className="text-sm text-muted-foreground">Pedidos acumulando valor mínimo para envio</p>
+                        <h1 className="text-lg font-semibold md:text-2xl">Aguardando Envio</h1>
+                        <p className="text-sm text-muted-foreground">Pedidos criados aguardando envio ao fornecedor</p>
                     </div>
                 </div>
                 <Button asChild>
@@ -44,6 +46,7 @@ export default async function FeedingOrdersPage({ searchParams }: { searchParams
 
             <div className="flex items-center gap-4">
                 <OrderSearch />
+                <SupplierFilter suppliers={suppliers} />
             </div>
 
             <div className="rounded-md border">
@@ -62,30 +65,32 @@ export default async function FeedingOrdersPage({ searchParams }: { searchParams
                         {orders.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                    Nenhum pedido alimentando no momento.
+                                    Nenhum pedido aguardando envio no momento.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             orders.map((order) => (
-                                <OrderTableRow key={order.id} orderId={order.id} backUrl="/feeding-orders">
+                                <OrderTableRow key={order.id} orderId={order.id} backUrl="/waiting-shipment">
                                     <TableCell className="font-medium">
                                         <div className="flex items-center gap-2">
                                             <span className="hover:underline">
                                                 {order.code}
                                             </span>
-                                            {order.checked && (
-                                                <div title="Conferido pelo gerente">
-                                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                                </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span>{order.supplier.name}</span>
+                                            {order.requestedBy && (
+                                                <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                                                    {order.requestedBy}
+                                                </span>
                                             )}
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span>{order.supplier.name}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" className="bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400">
-                                            Alimentando
+                                        <Badge variant="outline" className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
+                                            Aguardando Envio
                                         </Badge>
                                     </TableCell>
                                     <TableCell>

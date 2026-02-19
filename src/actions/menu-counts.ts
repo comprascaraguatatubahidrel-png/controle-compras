@@ -3,44 +3,24 @@ import { orders, refusedInvoices } from "@/db/schema"
 import { eq, not, or, and } from "drizzle-orm"
 
 export async function getMenuCounts() {
-    // Count active orders (excluding completed, cancelled, and feeding)
-    const activeOrders = await db.query.orders.findMany({
-        where: and(
-            not(eq(orders.status, 'RECEIVED_COMPLETE')),
-            not(eq(orders.status, 'CANCELLED')),
-            not(eq(orders.status, 'FEEDING'))
-        )
-    })
-
-    const ordersCount = activeOrders.length // Include all active orders
-
-    // Count cancelled orders
-    const cancelledOrders = await db.query.orders.findMany({
-        where: eq(orders.status, 'CANCELLED')
-    })
-    const cancelledCount = cancelledOrders.length
-
-    // Count orders with pending balance
-    const pendingBalanceOrders = await db.query.orders.findMany({
-        where: eq(orders.status, 'RECEIVED_PARTIAL')
-    })
-    const pendingBalanceCount = pendingBalanceOrders.length
-
-    // Count feeding orders
-    const feedingOrders = await db.query.orders.findMany({
-        where: eq(orders.status, 'FEEDING')
-    })
-    const feedingCount = feedingOrders.length
-
-    // Count refused invoices
-    const refusedInvoicesCount = await db.query.refusedInvoices.findMany()
+    const allOrders = await db.query.orders.findMany()
+    const today = new Date()
+    const todayStart = new Date(today.setHours(0, 0, 0, 0))
+    const todayEnd = new Date(today.setHours(23, 59, 59, 999))
 
     return {
-        orders: ordersCount,
-        cancelledOrders: cancelledCount,
-        refusedInvoices: refusedInvoicesCount.length,
-        pendingBalance: pendingBalanceCount,
-        feedingOrders: feedingCount
+        orders: allOrders.filter(o => !['RECEIVED_COMPLETE', 'CANCELLED', 'FEEDING'].includes(o.status)).length,
+        waitingShipment: allOrders.filter(o => o.status === 'CREATED').length,
+        waitingMirror: allOrders.filter(o => o.status === 'SENT').length,
+        arrivingToday: allOrders.filter(o => {
+            if (!o.expectedArrivalDate) return false
+            const d = new Date(o.expectedArrivalDate)
+            return d >= todayStart && d <= todayEnd
+        }).length,
+        cancelledOrders: allOrders.filter(o => o.status === 'CANCELLED').length,
+        refusedInvoices: (await db.query.refusedInvoices.findMany()).length,
+        pendingBalance: allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length,
+        feedingOrders: allOrders.filter(o => o.status === 'FEEDING').length
     }
 }
 
