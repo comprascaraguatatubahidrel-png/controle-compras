@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers, Clock } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers, Clock, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,7 @@ interface MenuCounts {
     cancelledOrders: number
     pendingBalance: number
     feedingOrders: number
+    receivedOrders: number
 }
 
 interface AppLayoutClientProps {
@@ -98,6 +99,7 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
         { href: "/pending-balance", icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, iconMobile: <AlertTriangle className="h-5 w-5 text-amber-500" />, label: "Saldos Pendentes", count: counts.pendingBalance },
         { href: "/refused-invoices", icon: <FileX className="h-4 w-4" />, iconMobile: <FileX className="h-5 w-5" />, label: "NFs Recusadas", count: counts.refusedInvoices },
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },
+        { href: "/received-orders", icon: <CheckCircle className="h-4 w-4 text-green-500" />, iconMobile: <CheckCircle className="h-5 w-5 text-green-500" />, label: "Recebidos Tudo Certo", count: counts.receivedOrders },
         { href: "/suppliers", icon: <Truck className="h-4 w-4" />, iconMobile: <Truck className="h-5 w-5" />, label: "Fornecedores", count: undefined },
         { href: "/representatives", icon: <Users className="h-4 w-4" />, iconMobile: <Users className="h-5 w-5" />, label: "Representantes", count: undefined },
         { href: "/analytics", icon: <LayoutDashboard className="h-4 w-4 text-emerald-500" />, iconMobile: <LayoutDashboard className="h-5 w-5" />, label: "Relatórios", count: undefined },

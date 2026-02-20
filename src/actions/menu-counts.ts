@@ -15,9 +15,10 @@ export async function getMenuCounts() {
         arrivingToday: allOrders.filter(o => {
             if (!o.expectedArrivalDate) return false
             const d = new Date(o.expectedArrivalDate)
-            return d >= todayStart && d <= todayEnd
+            return d >= todayStart && d <= todayEnd && !['RECEIVED_COMPLETE', 'CANCELLED'].includes(o.status)
         }).length,
         cancelledOrders: allOrders.filter(o => o.status === 'CANCELLED').length,
+        receivedOrders: allOrders.filter(o => o.status === 'RECEIVED_COMPLETE').length,
         refusedInvoices: (await db.query.refusedInvoices.findMany()).length,
         pendingBalance: allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length,
         feedingOrders: allOrders.filter(o => o.status === 'FEEDING').length

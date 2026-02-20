@@ -19,21 +19,14 @@ export async function getOrders(search?: string, status?: string, filter?: strin
         whereClause.push(eq(orders.supplierId, parseInt(supplierId)))
     }
 
-    if (date) {
-        const filterDate = new Date(date)
+    if (filter === 'arriving_today' || date) {
+        const targetDate = date ? new Date(date) : today
         whereClause.push(
             and(
-                gte(orders.expectedArrivalDate, startOfDay(filterDate)),
-                lte(orders.expectedArrivalDate, endOfDay(filterDate))
-            )
-        )
-    }
-
-    if (filter === 'arriving_today') {
-        whereClause.push(
-            and(
-                gte(orders.expectedArrivalDate, startOfDay(today)),
-                lte(orders.expectedArrivalDate, endOfDay(today))
+                gte(orders.expectedArrivalDate, startOfDay(targetDate)),
+                lte(orders.expectedArrivalDate, endOfDay(targetDate)),
+                not(eq(orders.status, 'RECEIVED_COMPLETE')),
+                not(eq(orders.status, 'CANCELLED'))
             )
         )
     }
