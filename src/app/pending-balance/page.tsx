@@ -17,6 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SupplierFilter } from "@/components/orders/SupplierFilter"
 import { ExportButton } from "@/components/common/ExportButton"
 
+import { PendingBalanceActions } from "@/components/orders/PendingBalanceActions"
+import { OrderTableRow } from "@/components/orders/OrderTableRow"
+
 export const dynamic = 'force-dynamic'
 
 function getDaysOverdue(expectedDate: Date | null): number {
@@ -136,12 +139,13 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
                             <TableHead>Data Prevista</TableHead>
                             <TableHead>Atraso</TableHead>
                             <TableHead>Motivo</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {orders.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                                     Nenhum pedido com saldo pendente encontrado.
                                 </TableCell>
                             </TableRow>
@@ -151,11 +155,9 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
                                 const isOverdue = daysOverdue > 0
 
                                 return (
-                                    <TableRow key={order.id} className={isOverdue ? "bg-red-50/50 dark:bg-red-950/10" : ""}>
+                                    <OrderTableRow key={order.id} orderId={order.id} backUrl="/pending-balance" className={isOverdue ? "bg-red-50/50 dark:bg-red-950/10" : ""}>
                                         <TableCell className="font-medium">
-                                            <Link href={`/orders/${order.id}?back=${encodeURIComponent('/pending-balance')}`} className="hover:underline text-primary">
-                                                {order.code}
-                                            </Link>
+                                            {order.code}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col">
@@ -188,7 +190,10 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
                                                 {order.partialReason || "-"}
                                             </span>
                                         </TableCell>
-                                    </TableRow>
+                                        <TableCell className="text-right">
+                                            <PendingBalanceActions orderId={order.id} remainingValue={order.remainingValue} />
+                                        </TableCell>
+                                    </OrderTableRow>
                                 )
                             })
                         )}
