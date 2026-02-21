@@ -251,6 +251,12 @@ export async function cancelOrder(id: number, reason: string, cancelledBy: strin
 }
 
 export async function updateOrderObservations(id: number, observations: string) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
     await db.update(orders)
         .set({
             observations: observations,
@@ -258,17 +264,37 @@ export async function updateOrderObservations(id: number, observations: string) 
         })
         .where(eq(orders.id, id))
 
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: `Observações atualizadas: ${observations || '(vazio)'}`,
+    })
+
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
 }
 
 export async function updateOrderRequestedBy(id: number, requestedBy: string) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
     await db.update(orders)
         .set({
             requestedBy: requestedBy,
             lastUpdate: new Date()
         })
         .where(eq(orders.id, id))
+
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: `Solicitante atualizado: ${requestedBy || '(vazio)'}`,
+    })
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")

@@ -164,12 +164,25 @@ export async function closeBalance(orderId: number, finalNotes?: string, closedB
 }
 
 export async function updatePartialReason(orderId: number, reason: string) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, orderId),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
     await db.update(orders)
         .set({
             partialReason: reason,
             lastUpdate: new Date()
         })
         .where(eq(orders.id, orderId))
+
+    await db.insert(orderHistory).values({
+        orderId: orderId,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: `Motivo do saldo atualizado: ${reason || '(vazio)'}`,
+    })
 
     revalidatePath(`/orders/${orderId}`)
 }
