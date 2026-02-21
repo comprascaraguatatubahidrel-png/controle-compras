@@ -1,8 +1,10 @@
 import { db } from "@/db"
 import { orders, refusedInvoices } from "@/db/schema"
 import { eq, not, or, and } from "drizzle-orm"
+import { unstable_noStore as noStore } from "next/cache"
 
 export async function getMenuCounts() {
+    noStore()
     const allOrders = await db.query.orders.findMany()
     const today = new Date()
     const todayStart = new Date(today.setHours(0, 0, 0, 0))

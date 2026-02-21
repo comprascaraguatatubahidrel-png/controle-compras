@@ -20,10 +20,12 @@ import { eq, not, or, and, lt, lte, gte } from "drizzle-orm"
 import { startOfDay, endOfDay } from "date-fns"
 import Link from "next/link"
 import { auth } from "@/auth"
+import { unstable_noStore as noStore } from "next/cache"
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  noStore()
   // Fetch real data
   const allOrders = await db.query.orders.findMany({
     with: {
