@@ -301,6 +301,12 @@ export async function updateOrderValue(id: number, newValue: string) {
 }
 
 export async function toggleOrderChecked(id: number, isChecked: boolean) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
     await db.update(orders)
         .set({
             checked: isChecked,
@@ -308,8 +314,25 @@ export async function toggleOrderChecked(id: number, isChecked: boolean) {
         })
         .where(eq(orders.id, id))
 
+    // Add History
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: isChecked ? "Pedido marcado como conferido pelo gerente" : "Marcação de conferido removida pelo gerente",
+    })
+
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+    revalidatePath("/feeding-orders")
+    revalidatePath("/waiting-shipment")
+    revalidatePath("/waiting-mirror")
+    revalidatePath("/arriving-today")
+    revalidatePath("/received-orders")
+    revalidatePath("/cancelled-orders")
+    revalidatePath("/pending-balance")
+    revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function deleteOrder(id: number) {
