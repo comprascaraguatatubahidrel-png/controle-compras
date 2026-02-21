@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { closeBalance } from "@/actions/partial-receipts"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface CloseBalanceModalProps {
     orderId: number
@@ -22,6 +23,7 @@ interface CloseBalanceModalProps {
 }
 
 export function CloseBalanceModal({ orderId, remainingValue }: CloseBalanceModalProps) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [notes, setNotes] = useState("")
     const [isPending, startTransition] = useTransition()
@@ -32,6 +34,7 @@ export function CloseBalanceModal({ orderId, remainingValue }: CloseBalanceModal
                 await closeBalance(orderId, notes || undefined)
                 toast.success("Saldo fechado! Pedido marcado como completo.")
                 setIsOpen(false)
+                router.refresh()
             } catch (error) {
                 toast.error("Erro ao fechar saldo")
             }

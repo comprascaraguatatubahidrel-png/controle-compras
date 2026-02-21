@@ -7,6 +7,7 @@ import { CheckCircle, Circle } from "lucide-react"
 import { toggleOrderChecked } from "@/actions/orders"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 interface OrderCheckButtonProps {
     orderId: number
@@ -14,6 +15,7 @@ interface OrderCheckButtonProps {
 }
 
 export function OrderCheckButton({ orderId, initialChecked }: OrderCheckButtonProps) {
+    const router = useRouter()
     const [checked, setChecked] = useState(initialChecked)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -24,6 +26,7 @@ export function OrderCheckButton({ orderId, initialChecked }: OrderCheckButtonPr
             await toggleOrderChecked(orderId, newState)
             setChecked(newState)
             toast.success(newState ? "Pedido marcado como conferido" : "Marcação de conferido removida")
+            router.refresh()
         } catch (error) {
             toast.error("Erro ao atualizar status de conferência")
             console.error(error)

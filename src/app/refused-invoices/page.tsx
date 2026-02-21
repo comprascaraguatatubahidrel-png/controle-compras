@@ -22,6 +22,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Image as ImageIcon } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function RefusedInvoicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
     const { q } = await searchParams
     const invoices = await getRefusedInvoices(q)

@@ -7,6 +7,7 @@ import { Pencil, Check, X } from "lucide-react"
 import { updateOrderObservations } from "@/actions/orders"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface OrderObservationsProps {
     orderId: number
@@ -14,6 +15,7 @@ interface OrderObservationsProps {
 }
 
 export function OrderObservations({ orderId, initialObservations }: OrderObservationsProps) {
+    const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const [observations, setObservations] = useState(initialObservations || "")
     const [isLoading, setIsLoading] = useState(false)
@@ -24,6 +26,7 @@ export function OrderObservations({ orderId, initialObservations }: OrderObserva
             await updateOrderObservations(orderId, observations)
             setIsEditing(false)
             toast.success('Observação atualizada!')
+            router.refresh()
         } catch (error) {
             console.error("Failed to update observations", error)
             toast.error('Erro ao atualizar observação.')

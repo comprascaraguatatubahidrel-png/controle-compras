@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Pencil, Check, X } from "lucide-react"
 import { updateOrderValue } from "@/actions/orders"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface OrderValueEditProps {
     orderId: number
@@ -13,6 +14,7 @@ interface OrderValueEditProps {
 }
 
 export function OrderValueEdit({ orderId, initialValue }: OrderValueEditProps) {
+    const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const [value, setValue] = useState(initialValue)
     const [isLoading, setIsLoading] = useState(false)
@@ -23,6 +25,7 @@ export function OrderValueEdit({ orderId, initialValue }: OrderValueEditProps) {
             await updateOrderValue(orderId, value)
             setIsEditing(false)
             toast.success("Valor atualizado com sucesso")
+            router.refresh()
         } catch (error) {
             console.error("Failed to update value", error)
             toast.error("Erro ao atualizar valor")

@@ -17,8 +17,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { cancelOrder } from "@/actions/orders"
 import { toast } from "sonner"
 import { FileX } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export function OrderCancelButton({ orderId }: { orderId: number }) {
+    const router = useRouter()
     const [open, setOpen] = useState(false)
     const [reason, setReason] = useState("")
     const [cancelledBy, setCancelledBy] = useState("")
@@ -35,6 +37,7 @@ export function OrderCancelButton({ orderId }: { orderId: number }) {
             await cancelOrder(orderId, reason, cancelledBy)
             toast.success("Pedido cancelado com sucesso")
             setOpen(false)
+            router.refresh()
         } catch (error) {
             toast.error("Erro ao cancelar pedido")
             console.error(error)

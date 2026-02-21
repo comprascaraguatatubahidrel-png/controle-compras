@@ -14,6 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { updateOrderRequestedBy } from "@/actions/orders"
+import { useRouter } from "next/navigation"
 
 interface OrderRequestedByEditProps {
     orderId: number
@@ -21,6 +22,7 @@ interface OrderRequestedByEditProps {
 }
 
 export function OrderRequestedByEdit({ orderId, initialValue }: OrderRequestedByEditProps) {
+    const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [value, setValue] = useState(initialValue || "")
@@ -53,6 +55,7 @@ export function OrderRequestedByEdit({ orderId, initialValue }: OrderRequestedBy
             await updateOrderRequestedBy(orderId, value)
             toast.success("Nome atualizado com sucesso!")
             setIsEditing(false)
+            router.refresh()
         } catch (error) {
             toast.error("Erro ao atualizar o nome")
         } finally {

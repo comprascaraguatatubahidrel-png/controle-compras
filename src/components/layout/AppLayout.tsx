@@ -1,6 +1,8 @@
 import { getMenuCounts } from "@/actions/menu-counts"
 import { AppLayoutClient } from "./AppLayoutClient"
 
+export const dynamic = 'force-dynamic'
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
     const counts = await getMenuCounts()
 

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { updateRemainingValue } from "@/actions/partial-receipts"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface RemainingValueEditProps {
     orderId: number
@@ -22,6 +23,7 @@ interface RemainingValueEditProps {
 }
 
 export function RemainingValueEdit({ orderId, initialValue }: RemainingValueEditProps) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [value, setValue] = useState(initialValue || "")
     const [isPending, startTransition] = useTransition()
@@ -32,6 +34,7 @@ export function RemainingValueEdit({ orderId, initialValue }: RemainingValueEdit
                 await updateRemainingValue(orderId, value)
                 toast.success("Valor do saldo atualizado!")
                 setIsOpen(false)
+                router.refresh()
             } catch (error) {
                 toast.error("Erro ao atualizar valor")
             }
