@@ -76,6 +76,11 @@ export default async function WaitingShipmentPage({ searchParams }: { searchPara
                                             <span className="hover:underline">
                                                 {order.code}
                                             </span>
+                                            {order.checked && (
+                                                <div title="Conferido pelo gerente">
+                                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                                </div>
+                                            )}
                                         </div>
                                     </TableCell>
                                     <TableCell>

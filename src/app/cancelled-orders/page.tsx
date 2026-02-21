@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { FileX, MoreHorizontal } from "lucide-react"
+import { FileX, MoreHorizontal, CheckCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -48,7 +48,14 @@ export default async function CancelledOrdersPage() {
                             orders.map((order) => (
                                 <TableRow key={order.id}>
                                     <TableCell className="font-medium">
-                                        {order.code}
+                                        <div className="flex items-center gap-2">
+                                            <span>{order.code}</span>
+                                            {order.checked && (
+                                                <div title="Conferido pelo gerente">
+                                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell>{order.supplier.name}</TableCell>
                                     <TableCell>
