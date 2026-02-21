@@ -53,6 +53,7 @@ export async function createPartialReceipt(data: {
     revalidatePath("/orders")
     revalidatePath("/pending-balance")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 
     return receipt
 }
@@ -116,6 +117,8 @@ export async function updateRemainingValue(orderId: number, newValue: string) {
     revalidatePath(`/orders/${orderId}`)
     revalidatePath("/orders")
     revalidatePath("/pending-balance")
+    revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function closeBalance(orderId: number, finalNotes?: string, closedBy?: string) {
@@ -155,7 +158,9 @@ export async function closeBalance(orderId: number, finalNotes?: string, closedB
     revalidatePath(`/orders/${orderId}`)
     revalidatePath("/orders")
     revalidatePath("/pending-balance")
+    revalidatePath("/received-orders")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function updatePartialReason(orderId: number, reason: string) {

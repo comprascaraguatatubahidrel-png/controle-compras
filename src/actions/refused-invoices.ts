@@ -45,4 +45,5 @@ export async function createRefusedInvoice(data: {
     })
 
     revalidatePath("/refused-invoices")
+    revalidatePath("/", "layout")
 }

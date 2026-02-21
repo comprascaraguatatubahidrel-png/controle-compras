@@ -160,8 +160,12 @@ export async function createOrder(data: { code: string, supplierId: string, tota
 
     revalidatePath("/orders")
     revalidatePath("/feeding-orders")
+    revalidatePath("/waiting-shipment")
+    revalidatePath("/waiting-mirror")
+    revalidatePath("/arriving-today")
     revalidatePath("/pendencies")
     revalidatePath("/")
+    revalidatePath("/", "layout")
     return newOrder
 }
 
@@ -204,8 +208,13 @@ export async function updateOrderStatus(id: number, newStatus: "FEEDING" | "CREA
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
     revalidatePath("/feeding-orders")
+    revalidatePath("/waiting-shipment")
+    revalidatePath("/waiting-mirror")
+    revalidatePath("/arriving-today")
+    revalidatePath("/received-orders")
     revalidatePath("/pending-balance")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function cancelOrder(id: number, reason: string, cancelledBy: string) {
@@ -237,6 +246,7 @@ export async function cancelOrder(id: number, reason: string, cancelledBy: strin
     revalidatePath("/orders")
     revalidatePath("/cancelled-orders")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function updateOrderObservations(id: number, observations: string) {
@@ -307,8 +317,15 @@ export async function deleteOrder(id: number) {
     await db.delete(orders).where(eq(orders.id, id))
 
     revalidatePath("/orders")
+    revalidatePath("/feeding-orders")
+    revalidatePath("/waiting-shipment")
+    revalidatePath("/waiting-mirror")
+    revalidatePath("/arriving-today")
+    revalidatePath("/received-orders")
     revalidatePath("/cancelled-orders")
+    revalidatePath("/pending-balance")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function restoreOrder(id: number) {
@@ -339,7 +356,9 @@ export async function restoreOrder(id: number) {
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
     revalidatePath("/cancelled-orders")
+    revalidatePath("/waiting-shipment")
     revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function getFeedingOrders(search?: string, supplierId?: string) {
