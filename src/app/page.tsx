@@ -48,7 +48,9 @@ export default async function DashboardPage() {
   const arrivingTodayCount = allOrders.filter(o => {
     if (!o.expectedArrivalDate) return false
     const expected = new Date(o.expectedArrivalDate)
-    return expected >= startOfDay(today) && expected <= endOfDay(today)
+    const isToday = expected >= startOfDay(today) && expected <= endOfDay(today)
+    const isActive = !['RECEIVED_COMPLETE', 'CANCELLED', 'FEEDING'].includes(o.status)
+    return isToday && isActive
   }).length
 
   const alertsCount = allOrders.filter(o => {

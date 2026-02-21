@@ -26,7 +26,8 @@ export async function getOrders(search?: string, status?: string, filter?: strin
                 gte(orders.expectedArrivalDate, startOfDay(targetDate)),
                 lte(orders.expectedArrivalDate, endOfDay(targetDate)),
                 not(eq(orders.status, 'RECEIVED_COMPLETE')),
-                not(eq(orders.status, 'CANCELLED'))
+                not(eq(orders.status, 'CANCELLED')),
+                not(eq(orders.status, 'FEEDING'))
             )
         )
     }

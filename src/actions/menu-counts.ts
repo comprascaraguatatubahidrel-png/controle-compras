@@ -17,7 +17,9 @@ export async function getMenuCounts() {
         arrivingToday: allOrders.filter(o => {
             if (!o.expectedArrivalDate) return false
             const d = new Date(o.expectedArrivalDate)
-            return d >= todayStart && d <= todayEnd && !['RECEIVED_COMPLETE', 'CANCELLED'].includes(o.status)
+            const isToday = d >= todayStart && d <= todayEnd
+            const isActive = !['RECEIVED_COMPLETE', 'CANCELLED', 'FEEDING'].includes(o.status)
+            return isToday && isActive
         }).length,
         cancelledOrders: allOrders.filter(o => o.status === 'CANCELLED').length,
         receivedOrders: allOrders.filter(o => o.status === 'RECEIVED_COMPLETE').length,
