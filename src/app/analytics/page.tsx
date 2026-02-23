@@ -142,12 +142,12 @@ export default async function AnalyticsPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-lg font-semibold md:text-2xl flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h1 className="text-xl font-semibold md:text-2xl flex items-center gap-2">
                     <TrendingUp className="h-6 w-6 text-primary" />
                     Relatórios e Métricas
                 </h1>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-2 rounded-md w-fit">
                     <Calendar className="h-4 w-4" />
                     <span>Últimos 12 meses</span>
                 </div>
@@ -198,19 +198,19 @@ export default async function AnalyticsPage() {
             </div>
 
             {/* Charts Section */}
-            <div className="grid gap-4 md:grid-cols-7">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
                 <MonthlySpendChart data={monthlySpendData} />
                 <TopSuppliersChart data={topSuppliersData} />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-7">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
                 <ReceiptEfficiencyChart data={efficiencyData} />
                 <StatusDistributionChart data={statusDistributionData} />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-7">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-7">
                 <TopRequestorsChart data={topRequestorsData} />
-                <div className="col-span-4 bg-muted/20 rounded-lg flex items-center justify-center border border-dashed">
+                <div className="col-span-1 md:col-span-4 bg-muted/20 rounded-lg flex items-center justify-center border border-dashed p-8">
                     <p className="text-muted-foreground text-sm">Próximos indicadores em breve...</p>
                 </div>
             </div>

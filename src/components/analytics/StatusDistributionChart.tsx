@@ -13,7 +13,7 @@ interface StatusDistributionChartProps {
 
 export function StatusDistributionChart({ data }: StatusDistributionChartProps) {
     return (
-        <Card className="col-span-3">
+        <Card className="col-span-1 md:col-span-3">
             <CardHeader>
                 <CardTitle>Status dos Pedidos</CardTitle>
                 <CardDescription>

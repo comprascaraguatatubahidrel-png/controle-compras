@@ -13,7 +13,7 @@ interface ReceiptEfficiencyChartProps {
 
 export function ReceiptEfficiencyChart({ data }: ReceiptEfficiencyChartProps) {
     return (
-        <Card className="col-span-4">
+        <Card className="col-span-1 md:col-span-4">
             <CardHeader>
                 <CardTitle>Eficiência de Recebimento</CardTitle>
                 <CardDescription>

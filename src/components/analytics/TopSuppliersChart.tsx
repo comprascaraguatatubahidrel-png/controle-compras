@@ -14,7 +14,7 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE'];
 
 export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
     return (
-        <Card className="col-span-3">
+        <Card className="col-span-1 md:col-span-3">
             <CardHeader>
                 <CardTitle>Top Fornecedores</CardTitle>
                 <CardDescription>
