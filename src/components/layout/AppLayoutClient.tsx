@@ -145,28 +145,30 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
                                 <span className="sr-only">Toggle navigation menu</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="flex flex-col">
-                            <nav className="grid gap-2 text-lg font-medium">
-                                <Link
-                                    href="/"
-                                    className="flex items-center gap-2 text-lg font-semibold"
-                                >
-                                    <Package className="h-6 w-6" />
-                                    <span className="sr-only">Gestão de Compras</span>
-                                </Link>
-                                {navItems.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        href={item.href}
-                                        icon={item.iconMobile}
-                                        count={item.count}
-                                        variant="mobile"
-                                        isActive={isActive(item.href)}
+                        <SheetContent side="left" className="flex flex-col p-0">
+                            <div className="flex-1 overflow-y-auto px-6 py-10">
+                                <nav className="grid gap-4 text-lg font-medium">
+                                    <Link
+                                        href="/"
+                                        className="flex items-center gap-2 text-lg font-semibold mb-6"
                                     >
-                                        {item.label}
-                                    </NavItem>
-                                ))}
-                            </nav>
+                                        <Package className="h-6 w-6" />
+                                        <span>Gestão de Compras</span>
+                                    </Link>
+                                    {navItems.map((item) => (
+                                        <NavItem
+                                            key={item.href}
+                                            href={item.href}
+                                            icon={item.iconMobile}
+                                            count={item.count}
+                                            variant="mobile"
+                                            isActive={isActive(item.href)}
+                                        >
+                                            {item.label}
+                                        </NavItem>
+                                    ))}
+                                </nav>
+                            </div>
                         </SheetContent>
                     </Sheet>
                     <div className="w-full flex-1">
