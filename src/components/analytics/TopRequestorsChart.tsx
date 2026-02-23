@@ -3,26 +3,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts"
 
-interface TopSuppliersChartProps {
+interface TopRequestorsChartProps {
     data: {
         name: string
         value: number
     }[]
 }
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE'];
+const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a4de6c', '#d0ed57'];
 
-export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
+export function TopRequestorsChart({ data }: TopRequestorsChartProps) {
     return (
         <Card className="col-span-3">
             <CardHeader>
-                <CardTitle>Top Fornecedores</CardTitle>
+                <CardTitle>Top Solicitantes</CardTitle>
                 <CardDescription>
-                    Os 15 fornecedores com maior volume de compras.
+                    Pessoas que mais realizaram pedidos.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <ResponsiveContainer width="100%" height={500}>
+                <ResponsiveContainer width="100%" height={350}>
                     <BarChart layout="vertical" data={data} margin={{ top: 0, right: 0, bottom: 0, left: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted))" />
                         <XAxis type="number" hide />
@@ -43,8 +43,8 @@ export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
                             }}
                             itemStyle={{ color: "hsl(var(--foreground))" }}
                             formatter={(value: number | undefined) => [
-                                new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0),
-                                "Total"
+                                value || 0,
+                                "Pedidos"
                             ]}
                         />
                         <Bar dataKey="value" radius={[0, 4, 4, 0]}>

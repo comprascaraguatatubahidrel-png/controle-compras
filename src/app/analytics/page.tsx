@@ -8,6 +8,8 @@ import { ptBR } from "date-fns/locale"
 import { MonthlySpendChart } from "@/components/analytics/MonthlySpendChart"
 import { TopSuppliersChart } from "@/components/analytics/TopSuppliersChart"
 import { StatusDistributionChart } from "@/components/analytics/StatusDistributionChart"
+import { TopRequestorsChart } from "@/components/analytics/TopRequestorsChart"
+import { ReceiptEfficiencyChart } from "@/components/analytics/ReceiptEfficiencyChart"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,44 +30,76 @@ export default async function AnalyticsPage() {
 
     // 3. Prepare Chart Data
 
-    // A. Monthly Spend (Last 12 Months)
+    // A. Monthly Spend & Volume (Last 12 Months)
     // Initialize map with last 12 months
-    const monthlyDataMap = new Map<string, number>()
+    const monthlyDataMap = new Map<string, { total: number; count: number }>()
     const today = new Date()
     for (let i = 11; i >= 0; i--) {
         const d = subMonths(today, i)
         const key = format(d, 'MMM/yy', { locale: ptBR })
-        monthlyDataMap.set(key, 0)
+        monthlyDataMap.set(key, { total: 0, count: 0 })
     }
 
     // Aggregate
     allOrders.forEach(order => {
-        // Use sentDate or createdAt. Assuming sentDate is reliable for financial tracking as per user flow.
         const date = new Date(order.sentDate)
         const key = format(date, 'MMM/yy', { locale: ptBR })
 
-        // Only count if it falls within our tracked months (it should if logic is correct, but safe to check)
         if (monthlyDataMap.has(key)) {
-            monthlyDataMap.set(key, (monthlyDataMap.get(key) || 0) + Number(order.totalValue || 0))
+            const current = monthlyDataMap.get(key)!
+            monthlyDataMap.set(key, {
+                total: current.total + Number(order.totalValue || 0),
+                count: current.count + 1
+            })
         }
     })
 
-    const monthlySpendData = Array.from(monthlyDataMap.entries()).map(([month, total]) => ({
+    const monthlySpendData = Array.from(monthlyDataMap.entries()).map(([month, data]) => ({
         month: month.charAt(0).toUpperCase() + month.slice(1), // Capitalize
-        total
+        total: data.total,
+        count: data.count
     }))
 
-    // B. Top Suppliers
+    // B. Top Suppliers & Requestors
     const supplierMap = new Map<string, number>()
+    const requestorMap = new Map<string, number>()
+
     allOrders.forEach(order => {
-        const name = order.supplier.name
-        supplierMap.set(name, (supplierMap.get(name) || 0) + Number(order.totalValue || 0))
+        // Supplier aggregation
+        const supplierName = order.supplier.name
+        supplierMap.set(supplierName, (supplierMap.get(supplierName) || 0) + Number(order.totalValue || 0))
+
+        // Requestor aggregation
+        const requestorName = order.requestedBy || 'Não Identificado'
+        requestorMap.set(requestorName, (requestorMap.get(requestorName) || 0) + 1)
     })
 
     const topSuppliersData = Array.from(supplierMap.entries())
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
-        .slice(0, 5)
+        .slice(0, 15)
+
+    const topRequestorsData = Array.from(requestorMap.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10)
+
+    // C. Receipt Efficiency (Complete vs Partial vs Pending)
+    const efficiencyData = [
+        { name: 'Recebido Total', value: 0, color: '#10b981' }, // RECEIVED_COMPLETE
+        { name: 'Recebido Parcial', value: 0, color: '#ef4444' }, // RECEIVED_PARTIAL
+        { name: 'Em Aberto/Pendência', value: 0, color: '#f59e0b' } // Others like WAITING_ARRIVAL, PENDING_ISSUE
+    ]
+
+    allOrders.forEach(order => {
+        if (order.status === 'RECEIVED_COMPLETE') {
+            efficiencyData[0].value++
+        } else if (order.status === 'RECEIVED_PARTIAL') {
+            efficiencyData[1].value++
+        } else if (['WAITING_ARRIVAL', 'PENDING_ISSUE', 'MIRROR_ARRIVED', 'APPROVED'].includes(order.status)) {
+            efficiencyData[2].value++
+        }
+    })
 
     // C. Status Distribution
     const statusMap = new Map<string, number>()
@@ -170,10 +204,15 @@ export default async function AnalyticsPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-7">
-                <div className="col-span-3"> {/* Spacer or another chart could go here */}
-                    <StatusDistributionChart data={statusDistributionData} />
+                <ReceiptEfficiencyChart data={efficiencyData} />
+                <StatusDistributionChart data={statusDistributionData} />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-7">
+                <TopRequestorsChart data={topRequestorsData} />
+                <div className="col-span-4 bg-muted/20 rounded-lg flex items-center justify-center border border-dashed">
+                    <p className="text-muted-foreground text-sm">Próximos indicadores em breve...</p>
                 </div>
-                {/* Future Chart */}
             </div>
         </div>
     )
