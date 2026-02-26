@@ -50,7 +50,7 @@ export default async function SupplierDetailsPage({ params }: { params: Promise<
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <span className="text-sm font-medium text-muted-foreground">Razão Social / Outro Nome</span>
+                            <span className="text-sm font-medium text-muted-foreground">Marca Representada</span>
                             <p>{supplier.brand || '-'}</p>
                         </div>
                         <div>

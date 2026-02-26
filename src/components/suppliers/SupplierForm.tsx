@@ -59,9 +59,9 @@ export function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormP
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Nome da Marca / Fornecedor Principal</FormLabel>
+                                    <FormLabel>Nome do Fornecedor</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Ex: Falge, Deca, Docol, etc." {...field} />
+                                        <Input placeholder="Ex: Deca, Docol, etc." {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -72,12 +72,12 @@ export function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormP
                             name="brand"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Razão Social / Outro Nome</FormLabel>
+                                    <FormLabel>Marca Representada</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Ex: Indústria e Comércio Ltda..." {...field} />
+                                        <Input placeholder="Ex: Deca Hyda" {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        Opcional. Preencha apenas se a razão social ou nome legal for diferente da marca.
+                                        Preencha se o fornecedor for representante de uma marca específica.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
