@@ -36,6 +36,13 @@
       "when": 1771076018624,
       "tag": "0004_hard_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772129931612,
+      "tag": "0005_panoramic_zombie",
+      "breakpoints": true
     }
   ]
 }

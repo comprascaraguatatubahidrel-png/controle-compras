@@ -30,22 +30,24 @@ export async function getSupplierById(id: number | string) {
     return data
 }
 
-export async function createSupplier(data: { name: string, brand?: string, observations?: string }) {
+export async function createSupplier(data: { name: string, brand?: string, observations?: string, whatsapp?: string }) {
     await db.insert(suppliers).values({
         name: data.name,
         brand: data.brand || null,
         observations: data.observations || null,
+        whatsapp: data.whatsapp || null,
     })
     revalidatePath("/suppliers")
     revalidatePath("/orders/new")
 }
 
-export async function updateSupplier(id: number, data: { name: string, brand?: string, observations?: string }) {
+export async function updateSupplier(id: number, data: { name: string, brand?: string, observations?: string, whatsapp?: string }) {
     await db.update(suppliers)
         .set({
             name: data.name,
             brand: data.brand || null,
             observations: data.observations || null,
+            whatsapp: data.whatsapp || null,
             updatedAt: new Date()
         })
         .where(eq(suppliers.id, id))

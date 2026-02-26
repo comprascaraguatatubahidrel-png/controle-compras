@@ -43,6 +43,7 @@ export const suppliers = pgTable('suppliers', {
   name: text('name').notNull(),
   brand: text('brand'),
   observations: text('observations'),
+  whatsapp: text('whatsapp'),
   storeId: integer('store_id').references(() => stores.id), // Nullable for migration
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

@@ -1,5 +1,5 @@
 import { OrderValueEdit } from "@/components/orders/OrderValueEdit"
-import { ArrowLeft, Calendar, FileText, Truck, User, AlertTriangle } from "lucide-react"
+import { ArrowLeft, Calendar, FileText, Truck, User, AlertTriangle, MessageCircle } from "lucide-react"
 import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import { OrderRequestedByEdit } from "@/components/orders/OrderRequestedByEdit"
 import Link from "next/link"
@@ -72,7 +72,20 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
                             </Badge>
                             <OrderCheckButton orderId={order.id} initialChecked={order.checked} />
                         </div>
-                        <p className="text-muted-foreground truncate">{order.supplier.name}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-muted-foreground truncate">{order.supplier.name}</p>
+                            {order.supplier.whatsapp && (
+                                <a
+                                    href={`https://wa.me/${order.supplier.whatsapp.replace(/\D/g, '')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-sm text-green-600 hover:text-green-700 hover:underline dark:text-green-500 dark:hover:text-green-400"
+                                >
+                                    <MessageCircle className="h-4 w-4" />
+                                    <span>{order.supplier.whatsapp}</span>
+                                </a>
+                            )}
+                        </div>
                     </div>
                 </div>
 

@@ -23,6 +23,7 @@ const supplierSchema = z.object({
         message: "Nome deve ter pelo menos 2 caracteres.",
     }),
     brand: z.string().optional(),
+    whatsapp: z.string().optional(),
     observations: z.string().optional(),
 })
 
@@ -40,6 +41,7 @@ export function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormP
         defaultValues: initialData || {
             name: "",
             brand: "",
+            whatsapp: "",
             observations: "",
         },
     })
@@ -77,6 +79,19 @@ export function SupplierForm({ initialData, onSubmit, isLoading }: SupplierFormP
                                     <FormDescription>
                                         Preencha se o fornecedor for representante de uma marca específica.
                                     </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="whatsapp"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>WhatsApp</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Ex: (11) 98765-4321" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
