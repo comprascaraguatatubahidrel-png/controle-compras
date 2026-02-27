@@ -1,8 +1,7 @@
 import Link from "next/link"
-import { Search, Plus, Filter, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react"
+import { Plus, Filter, MoreHorizontal, Eye, Edit } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
     Table,
     TableBody,
@@ -23,9 +22,18 @@ import { Badge } from "@/components/ui/badge"
 import { getSuppliers } from "@/actions/suppliers"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { DeleteSupplierButton } from "@/components/suppliers/DeleteSupplierButton"
+import { SupplierSearch } from "@/components/suppliers/SupplierSearch"
 
-export default async function SuppliersPage() {
-    const suppliers = await getSuppliers()
+export default async function SuppliersPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const params = await searchParams
+    const search = typeof params.q === 'string' ? params.q : undefined
+
+    const suppliers = await getSuppliers(search)
 
     return (
         <div className="flex flex-col gap-6">
@@ -39,14 +47,7 @@ export default async function SuppliersPage() {
             </div>
 
             <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Buscar por nome ou marca..."
-                        className="w-full pl-8 md:w-[300px] lg:w-[400px]"
-                    />
-                </div>
+                <SupplierSearch />
                 <Button variant="outline" size="icon">
                     <Filter className="h-4 w-4" />
                 </Button>
@@ -72,9 +73,6 @@ export default async function SuppliersPage() {
                             </TableRow>
                         ) : (
                             suppliers.map((supplier) => {
-                                // Logic to determine if active based on last order could go here
-                                // For now, let's assume active if they have any orders in the last 6 months?
-                                // Or simplistically always active for MVP
                                 const hasOrders = supplier.orders.length > 0
                                 const lastOrder = hasOrders
                                     ? supplier.orders.sort((a, b) => new Date(b.sentDate).getTime() - new Date(a.sentDate).getTime())[0]
@@ -114,6 +112,11 @@ export default async function SuppliersPage() {
                                                             <Edit className="mr-2 h-4 w-4" /> Editar
                                                         </Link>
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DeleteSupplierButton
+                                                        supplierId={supplier.id}
+                                                        supplierName={supplier.name}
+                                                    />
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>

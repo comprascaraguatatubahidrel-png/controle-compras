@@ -1,17 +1,20 @@
 'use server'
 
 import { db } from "@/db"
-import { suppliers } from "@/db/schema"
+import { suppliers, representatives } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { desc, eq } from "drizzle-orm"
+import { desc, asc, eq, ilike } from "drizzle-orm"
 
-export async function getSuppliers() {
+export async function getSuppliers(search?: string) {
+    const whereClause = search ? ilike(suppliers.name, `%${search}%`) : undefined
+
     const data = await db.query.suppliers.findMany({
+        where: whereClause,
         with: {
             orders: true,
             representatives: true,
         },
-        orderBy: [desc(suppliers.createdAt)],
+        orderBy: [asc(suppliers.name)],
     })
     return data
 }
@@ -64,7 +67,12 @@ export async function deleteSupplier(id: number) {
         throw new Error("Não é possível excluir fornecedor com pedidos vinculados.")
     }
 
+    // Explicitly delete representatives to avoid foreign key violation
+    await db.delete(representatives).where(eq(representatives.supplierId, id))
+
+    // Now delete the supplier
     await db.delete(suppliers).where(eq(suppliers.id, id))
+
     revalidatePath("/suppliers")
     revalidatePath("/orders/new")
 }
