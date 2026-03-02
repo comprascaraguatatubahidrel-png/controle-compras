@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle, Truck, AlertTriangle, ThumbsUp, CalendarClock, Layers, Send } from "lucide-react"
+import { CheckCircle, Truck, AlertTriangle, ThumbsUp, CalendarClock, Layers, Send, RotateCcw } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { toast } from "sonner"
@@ -80,6 +80,18 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
 
     return (
         <div className="flex flex-wrap gap-2">
+            {status !== "FEEDING" && status !== "CANCELLED" && status !== "RECEIVED_COMPLETE" && status !== "RECEIVED_PARTIAL" && (
+                <Button onClick={() => {
+                    if (window.confirm("Tem certeza que deseja voltar este pedido para o status Alimentando?")) {
+                        onStatusChange("FEEDING", "Retornou para Alimentando")
+                        toast.success('Pedido movido para Alimentando!')
+                    }
+                }} variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20">
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Voltar para Alimentando
+                </Button>
+            )}
+
             {status === "FEEDING" && (
                 <Button onClick={() => {
                     onStatusChange("CREATED", "Movido para Aguardando Envio")
