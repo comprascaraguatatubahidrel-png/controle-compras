@@ -80,7 +80,7 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
 
     return (
         <div className="flex flex-wrap gap-2">
-            {status !== "FEEDING" && status !== "CANCELLED" && status !== "RECEIVED_COMPLETE" && status !== "RECEIVED_PARTIAL" && (
+            {status !== "FEEDING" && status !== "RECEIVED_COMPLETE" && status !== "RECEIVED_PARTIAL" && (
                 <Button onClick={() => {
                     if (window.confirm("Tem certeza que deseja voltar este pedido para o status Alimentando?")) {
                         onStatusChange("FEEDING", "Retornou para Alimentando")
