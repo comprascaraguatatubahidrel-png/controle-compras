@@ -11,6 +11,7 @@ import {
   DollarSign,
   Package,
   Layers,
+  AlertOctagon,
 } from "lucide-react"
 import { RecentAlerts } from "@/components/dashboard/RecentAlerts"
 import { TopSuppliers } from "@/components/dashboard/TopSuppliers"
@@ -53,6 +54,12 @@ export default async function DashboardPage() {
     return isToday && isActive
   }).length
 
+  const overdueCount = allOrders.filter(o => {
+    if (o.status !== 'WAITING_ARRIVAL') return false
+    if (!o.expectedArrivalDate) return false
+    return new Date(o.expectedArrivalDate) < startOfDay(today)
+  }).length
+
   const alertsCount = allOrders.filter(o => {
     // Skip finalized orders
     if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
@@ -80,7 +87,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-6">
         {/* REPLACED: Total Open -> Waiting Shipment */}
         <Link href="/waiting-shipment" className="block group">
           <Card className="hover:shadow-lg transition-all duration-300 hover:border-gray-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-gray-500 bg-gradient-to-br from-white to-gray-50/50 dark:from-zinc-950 dark:to-gray-950/10">
@@ -165,6 +172,28 @@ export default async function DashboardPage() {
               </div>
               <p className="text-xs text-purple-600/80 dark:text-purple-400/70 mt-1 font-medium">
                 Previsão para hoje
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/overdue-orders" className="block group">
+          <Card className="hover:shadow-lg transition-all duration-300 hover:border-red-500/50 cursor-pointer overflow-hidden relative border-l-4 border-l-red-500 bg-gradient-to-br from-white to-red-50/50 dark:from-zinc-950 dark:to-red-950/10">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <AlertOctagon className="h-12 w-12 text-red-500" />
+            </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-red-700 dark:text-red-400">Atrasados</CardTitle>
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                <AlertOctagon className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold truncate tracking-tight text-red-950 dark:text-red-50">
+                {overdueCount}
+              </div>
+              <p className="text-xs text-red-600/80 dark:text-red-400/70 mt-1 font-medium">
+                Prazo vencido
               </p>
             </CardContent>
           </Card>

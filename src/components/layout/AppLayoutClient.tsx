@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers, Clock, CheckCircle } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, AlertTriangle, FileX, Ban, Truck, Users, Package, Menu, Layers, Clock, CheckCircle, AlertOctagon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,7 @@ interface MenuCounts {
     pendingBalance: number
     feedingOrders: number
     receivedOrders: number
+    overdueOrders: number
 }
 
 interface AppLayoutClientProps {
@@ -96,6 +97,7 @@ export function AppLayoutClient({ children, counts }: AppLayoutClientProps) {
         { href: "/feeding-orders", icon: <Layers className="h-4 w-4 text-teal-500" />, iconMobile: <Layers className="h-5 w-5 text-teal-500" />, label: "Alimentando", count: counts.feedingOrders },
         { href: "/waiting-mirror", icon: <Clock className="h-4 w-4 text-blue-500" />, iconMobile: <Clock className="h-5 w-5 text-blue-500" />, label: "Aguardando Espelho", count: counts.waitingMirror },
         { href: "/arriving-today", icon: <Package className="h-4 w-4 text-purple-500" />, iconMobile: <Package className="h-5 w-5 text-purple-500" />, label: "Chega Hoje", count: counts.arrivingToday },
+        { href: "/overdue-orders", icon: <AlertOctagon className="h-4 w-4 text-red-500" />, iconMobile: <AlertOctagon className="h-5 w-5 text-red-500" />, label: "Pedidos Atrasados", count: counts.overdueOrders },
         { href: "/pending-balance", icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, iconMobile: <AlertTriangle className="h-5 w-5 text-amber-500" />, label: "Saldos Pendentes", count: counts.pendingBalance },
         { href: "/refused-invoices", icon: <FileX className="h-4 w-4" />, iconMobile: <FileX className="h-5 w-5" />, label: "NFs Recusadas", count: counts.refusedInvoices },
         { href: "/cancelled-orders", icon: <Ban className="h-4 w-4" />, iconMobile: <Ban className="h-5 w-5" />, label: "Pedidos Cancelados", count: counts.cancelledOrders },

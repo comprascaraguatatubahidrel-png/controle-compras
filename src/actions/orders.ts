@@ -164,6 +164,7 @@ export async function createOrder(data: { code: string, supplierId: string, tota
     revalidatePath("/waiting-shipment")
     revalidatePath("/waiting-mirror")
     revalidatePath("/arriving-today")
+    revalidatePath("/overdue-orders")
     revalidatePath("/pendencies")
     revalidatePath("/")
     revalidatePath("/", "layout")
@@ -214,6 +215,7 @@ export async function updateOrderStatus(id: number, newStatus: "FEEDING" | "CREA
     revalidatePath("/arriving-today")
     revalidatePath("/received-orders")
     revalidatePath("/pending-balance")
+    revalidatePath("/overdue-orders")
     revalidatePath("/")
     revalidatePath("/", "layout")
 }
@@ -246,6 +248,7 @@ export async function cancelOrder(id: number, reason: string, cancelledBy: strin
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
     revalidatePath("/cancelled-orders")
+    revalidatePath("/overdue-orders")
     revalidatePath("/")
     revalidatePath("/", "layout")
 }
@@ -357,6 +360,7 @@ export async function toggleOrderChecked(id: number, isChecked: boolean) {
     revalidatePath("/received-orders")
     revalidatePath("/cancelled-orders")
     revalidatePath("/pending-balance")
+    revalidatePath("/overdue-orders")
     revalidatePath("/")
     revalidatePath("/", "layout")
 }
@@ -374,6 +378,7 @@ export async function deleteOrder(id: number) {
     revalidatePath("/received-orders")
     revalidatePath("/cancelled-orders")
     revalidatePath("/pending-balance")
+    revalidatePath("/overdue-orders")
     revalidatePath("/")
     revalidatePath("/", "layout")
 }
@@ -426,6 +431,37 @@ export async function getFeedingOrders(search?: string, supplierId?: string) {
             supplier: true,
         },
         orderBy: [desc(orders.sentDate)]
+    })
+
+    if (search) {
+        const searchLower = search.toLowerCase()
+        return results.filter(order =>
+            order.code.toLowerCase().includes(searchLower) ||
+            order.supplier.name.toLowerCase().includes(searchLower)
+        )
+    }
+
+    return results
+}
+
+export async function getOverdueOrders(search?: string, supplierId?: string) {
+    const today = new Date()
+
+    let whereClause: any[] = [
+        eq(orders.status, 'WAITING_ARRIVAL'),
+        lte(orders.expectedArrivalDate, startOfDay(today)),
+    ]
+
+    if (supplierId && supplierId !== 'ALL') {
+        whereClause.push(eq(orders.supplierId, parseInt(supplierId)))
+    }
+
+    const results = await db.query.orders.findMany({
+        where: and(...whereClause),
+        with: {
+            supplier: true,
+        },
+        orderBy: [desc(orders.expectedArrivalDate)]
     })
 
     if (search) {

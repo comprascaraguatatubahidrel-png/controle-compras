@@ -2,6 +2,7 @@ import { db } from "@/db"
 import { orders, refusedInvoices } from "@/db/schema"
 import { eq, not, or, and } from "drizzle-orm"
 import { unstable_noStore as noStore } from "next/cache"
+import { startOfDay } from "date-fns"
 
 export async function getMenuCounts() {
     noStore()
@@ -25,7 +26,12 @@ export async function getMenuCounts() {
         receivedOrders: allOrders.filter(o => o.status === 'RECEIVED_COMPLETE').length,
         refusedInvoices: (await db.query.refusedInvoices.findMany()).length,
         pendingBalance: allOrders.filter(o => o.status === 'RECEIVED_PARTIAL').length,
-        feedingOrders: allOrders.filter(o => o.status === 'FEEDING').length
+        feedingOrders: allOrders.filter(o => o.status === 'FEEDING').length,
+        overdueOrders: allOrders.filter(o => {
+            if (o.status !== 'WAITING_ARRIVAL') return false
+            if (!o.expectedArrivalDate) return false
+            return new Date(o.expectedArrivalDate) < startOfDay(new Date())
+        }).length,
     }
 }
 

@@ -1,5 +1,6 @@
-import { AlertTriangle, ArrowRight, Clock } from "lucide-react"
+import { AlertTriangle, ArrowRight, Clock, AlertOctagon } from "lucide-react"
 import Link from "next/link"
+import { differenceInDays, startOfDay } from "date-fns"
 
 interface RecentAlertsProps {
     orders: any[]
@@ -9,9 +10,27 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
+    // Critical delays: WAITING_ARRIVAL with >10 days overdue
+    const criticalDelays = orders.filter(o => {
+        if (o.status !== 'WAITING_ARRIVAL') return false
+        if (!o.expectedArrivalDate) return false
+        const expected = startOfDay(new Date(o.expectedArrivalDate))
+        return differenceInDays(today, expected) > 10
+    }).sort((a, b) => {
+        const daysA = differenceInDays(today, startOfDay(new Date(a.expectedArrivalDate)))
+        const daysB = differenceInDays(today, startOfDay(new Date(b.expectedArrivalDate)))
+        return daysB - daysA
+    })
+
     const alerts = orders.filter(o => {
         // Skip finalized orders — never show as alerts
         if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
+
+        // Skip critical delays (they have their own section)
+        if (o.status === 'WAITING_ARRIVAL' && o.expectedArrivalDate) {
+            const expected = startOfDay(new Date(o.expectedArrivalDate))
+            if (differenceInDays(today, expected) > 10) return false
+        }
 
         // Delayed arrival
         if (o.expectedArrivalDate && new Date(o.expectedArrivalDate) < today) return true
@@ -34,7 +53,7 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
         return expected.getTime() === today.getTime()
     })
 
-    if (alerts.length === 0 && arrivingToday.length === 0) {
+    if (criticalDelays.length === 0 && alerts.length === 0 && arrivingToday.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-4 text-center text-muted-foreground">
                 <p>Nenhum alerta para o momento.</p>
@@ -44,6 +63,47 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
 
     return (
         <div className="space-y-3">
+            {/* Critical Delays (>10 days) */}
+            {criticalDelays.map((order) => {
+                const daysOverdue = differenceInDays(today, startOfDay(new Date(order.expectedArrivalDate)))
+                return (
+                    <Link
+                        key={`critical-${order.id}`}
+                        href={`/orders/${order.id}`}
+                        className="group flex items-center gap-4 rounded-lg border-2 p-3 border-l-4 border-l-red-700 border-red-300 bg-red-100/80 hover:bg-red-100 dark:bg-red-950/30 dark:hover:bg-red-950/40 dark:border-red-800 transition-all cursor-pointer animate-pulse-subtle"
+                    >
+                        <div className="h-9 w-9 bg-red-200 text-red-700 dark:bg-red-900/50 dark:text-red-300 rounded-full flex items-center justify-center shrink-0">
+                            <AlertOctagon className="h-4 w-4" />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                            <div className="flex flex-col gap-0.5 mb-1.5">
+                                <p className="text-sm font-bold text-red-900 dark:text-red-200 truncate leading-none">
+                                    {order.supplier?.brand || order.supplier?.name || "Fornecedor S/M"}
+                                </p>
+                                <p className="text-xs font-semibold text-red-700 dark:text-red-400">
+                                    Pedido {order.code}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                    <span className="text-xs font-bold text-red-800 dark:text-red-300 tracking-tight truncate">
+                                        ⚠️ Atraso Crítico — {daysOverdue} dias
+                                    </span>
+                                </div>
+                                <span className="text-xs font-medium text-red-700 dark:text-red-400 whitespace-nowrap bg-red-200 dark:bg-red-900/50 px-2 py-0.5 rounded-full">
+                                    R$ {order.totalValue}
+                                </span>
+                            </div>
+                        </div>
+
+                        <ArrowRight className="h-4 w-4 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
+                    </Link>
+                )
+            })}
+
+            {/* Regular alerts */}
             {alerts.map((order) => {
                 const isMirrorDelay = order.status === 'SENT' && (new Date(order.sentDate) < new Date(Date.now() - 3 * 24 * 60 * 60 * 1000))
                 const isPartial = order.status === 'RECEIVED_PARTIAL'
@@ -128,3 +188,4 @@ export function RecentAlerts({ orders }: RecentAlertsProps) {
         </div>
     )
 }
+
