@@ -63,6 +63,8 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                 note = "Prazo de retorno do espelho estendido"
             } else if (status === "WAITING_ARRIVAL") {
                 note = "Previsão de chegada reagendada"
+            } else if (status === "RECEIVED_PARTIAL") {
+                note = "Prazo de recebimento do saldo estendido"
             }
             // Keep the same status, just update specific fields
             onStatusChange(status, note, date)
@@ -131,12 +133,10 @@ export function OrderActions({ status, onStatusChange }: OrderActionsProps) {
                         <Truck className="mr-2 h-4 w-4" />
                         Receber Pedido
                     </Button>
-                    {status === "WAITING_ARRIVAL" && (
-                        <Button onClick={() => handleAction("EXTEND")} variant="ghost" className="text-muted-foreground hover:text-primary">
-                            <CalendarClock className="mr-2 h-4 w-4" />
-                            Estender Prazo
-                        </Button>
-                    )}
+                    <Button onClick={() => handleAction("EXTEND")} variant="ghost" className="text-muted-foreground hover:text-primary">
+                        <CalendarClock className="mr-2 h-4 w-4" />
+                        Estender Prazo
+                    </Button>
                 </>
             )}
 
