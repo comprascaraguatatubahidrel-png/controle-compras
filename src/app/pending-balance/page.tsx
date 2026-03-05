@@ -198,7 +198,7 @@ export default async function PendingBalancePage({ searchParams }: { searchParam
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <PendingBalanceActions orderId={order.id} remainingValue={order.remainingValue} />
+                                            <PendingBalanceActions orderId={order.id} remainingValue={order.remainingValue} currentExpectedDate={order.expectedArrivalDate ? order.expectedArrivalDate.toLocaleDateString('pt-BR') : null} />
                                         </TableCell>
                                     </OrderTableRow>
                                 )

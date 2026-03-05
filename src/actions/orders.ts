@@ -329,6 +329,41 @@ export async function updateOrderValue(id: number, newValue: string) {
     revalidatePath("/orders")
 }
 
+export async function updateOrderExpectedDate(id: number, newDate: Date) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
+    const oldDateStr = currentOrder.expectedArrivalDate
+        ? currentOrder.expectedArrivalDate.toLocaleDateString('pt-BR')
+        : '(sem data)'
+    const newDateStr = newDate.toLocaleDateString('pt-BR')
+
+    await db.update(orders)
+        .set({
+            expectedArrivalDate: newDate,
+            lastUpdate: new Date()
+        })
+        .where(eq(orders.id, id))
+
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: currentOrder.status,
+        notes: `Prazo estendido de ${oldDateStr} para ${newDateStr}`,
+    })
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+    revalidatePath("/pending-balance")
+    revalidatePath("/overdue-orders")
+    revalidatePath("/arriving-today")
+    revalidatePath("/")
+    revalidatePath("/", "layout")
+}
+
 export async function toggleOrderChecked(id: number, isChecked: boolean) {
     const currentOrder = await db.query.orders.findFirst({
         where: eq(orders.id, id),
