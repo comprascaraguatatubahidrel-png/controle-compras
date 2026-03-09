@@ -187,7 +187,8 @@ export async function updateOrderStatus(id: number, newStatus: "FEEDING" | "CREA
             expectedArrivalDate: expectedDate || currentOrder.expectedArrivalDate,
             remainingValue: remainingValue || null,
             partialReason: newStatus === "RECEIVED_PARTIAL" ? (partialReason || null) : null,
-            lastUpdate: new Date()
+            lastUpdate: new Date(),
+            ...(newStatus === "SENT" ? { sentDate: new Date() } : {}),
         })
         .where(eq(orders.id, id))
 

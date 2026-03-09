@@ -64,11 +64,11 @@ export default async function DashboardPage() {
     // Skip finalized orders
     if (o.status === 'RECEIVED_COMPLETE' || o.status === 'CANCELLED') return false
 
-    // Alert 1: Espelho atrasado (SENT > 3 days)
+    // Alert 1: Espelho atrasado (SENT > 2 days / 48h)
     if (o.status === 'SENT') {
-      const threeDaysAgo = new Date()
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
-      if (o.sentDate < threeDaysAgo) return true
+      const twoDaysAgo = new Date()
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
+      if (o.sentDate < twoDaysAgo) return true
     }
 
     // Alert 2 & 3: Delayed arrival or overdue partial
