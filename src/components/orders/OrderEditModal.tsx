@@ -135,7 +135,7 @@ export function OrderEditModal({ order }: OrderEditModalProps) {
     async function onSubmit(data: EditFormValues) {
         setIsLoading(true)
         try {
-            await updateOrder(order.id, {
+            const result = await updateOrder(order.id, {
                 code: data.code,
                 supplierId: parseInt(data.supplierId),
                 totalValue: data.totalValue,
@@ -144,15 +144,19 @@ export function OrderEditModal({ order }: OrderEditModalProps) {
                 expectedArrivalDate: data.expectedDate || null,
                 requestedBy: data.requestedBy,
             })
+            if (!result.success) {
+                if (result.error === "DUPLICATE_ORDER_CODE") {
+                    toast.error("Já existe outro pedido com este número!")
+                } else {
+                    toast.error("Erro ao atualizar o pedido.")
+                }
+                return
+            }
             toast.success("Pedido atualizado com sucesso!")
             setIsOpen(false)
             router.refresh()
         } catch (error: any) {
-            if (error?.message === "DUPLICATE_ORDER_CODE") {
-                toast.error("Já existe outro pedido com este número!")
-            } else {
-                toast.error("Erro ao atualizar o pedido.")
-            }
+            toast.error("Erro ao atualizar o pedido.")
         } finally {
             setIsLoading(false)
         }

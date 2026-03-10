@@ -368,19 +368,19 @@ export async function updateOrder(id: number, data: {
     observations?: string,
     expectedArrivalDate?: Date | null,
     requestedBy?: string,
-}) {
+}): Promise<{ success: boolean, error?: string }> {
     const currentOrder = await db.query.orders.findFirst({
         where: eq(orders.id, id),
         with: { supplier: true },
     })
 
-    if (!currentOrder) throw new Error("Order not found")
+    if (!currentOrder) return { success: false, error: "Order not found" }
 
     // Check for duplicate code if code is being changed
     if (data.code && data.code !== currentOrder.code) {
         const isDuplicate = await checkDuplicateOrderCode(data.code, id)
         if (isDuplicate) {
-            throw new Error("DUPLICATE_ORDER_CODE")
+            return { success: false, error: "DUPLICATE_ORDER_CODE" }
         }
     }
 
@@ -401,7 +401,7 @@ export async function updateOrder(id: number, data: {
         changes.push(`Valor: R$ ${currentOrder.totalValue || '0.00'} → R$ ${data.totalValue}`)
     }
     if (data.status !== undefined && data.status !== currentOrder.status) {
-        updateData.status = data.status
+        updateData.status = data.status as any
         changes.push(`Status: ${statusLabelMap[currentOrder.status] || currentOrder.status} → ${statusLabelMap[data.status] || data.status}`)
     }
     if (data.observations !== undefined && data.observations !== (currentOrder.observations || '')) {
@@ -425,7 +425,7 @@ export async function updateOrder(id: number, data: {
         changes.push(`Solicitante: ${currentOrder.requestedBy || '(vazio)'} → ${data.requestedBy}`)
     }
 
-    if (changes.length === 0) return currentOrder
+    if (changes.length === 0) return { success: true }
 
     await db.update(orders)
         .set(updateData)
@@ -451,6 +451,8 @@ export async function updateOrder(id: number, data: {
     revalidatePath("/pendencies")
     revalidatePath("/")
     revalidatePath("/", "layout")
+
+    return { success: true }
 }
 
 export async function updateOrderExpectedDate(id: number, newDate: Date) {
