@@ -143,9 +143,13 @@ export function OrderForm({ mode = 'order' }: OrderFormProps) {
         // Redirect to the new order details page to trigger the modal
         router.push(`/orders/${newOrder.id}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create order", error)
-      toast.error('Erro ao salvar. Tente novamente.')
+      if (error?.message === 'DUPLICATE_ORDER_CODE') {
+        toast.error('Já existe um pedido com este número! Verifique o código e tente novamente.')
+      } else {
+        toast.error('Erro ao salvar. Tente novamente.')
+      }
     } finally {
       setIsLoading(false)
     }

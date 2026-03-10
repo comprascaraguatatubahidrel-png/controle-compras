@@ -3,7 +3,7 @@
 import { db } from "@/db"
 import { orders, orderHistory, partialReceipts, suppliers } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { eq, desc, and, gte, lte, not, or } from "drizzle-orm"
+import { eq, desc, and, gte, lte, not, or, ne } from "drizzle-orm"
 import { startOfDay, endOfDay, subDays } from "date-fns"
 
 export async function getOrders(search?: string, status?: string, filter?: string, supplierId?: string, date?: string) {
@@ -134,7 +134,24 @@ export async function getOrderById(id: number | string) {
     return order
 }
 
+export async function checkDuplicateOrderCode(code: string, excludeId?: number) {
+    const conditions: any[] = [eq(orders.code, code)]
+    if (excludeId) {
+        conditions.push(ne(orders.id, excludeId))
+    }
+    const existing = await db.query.orders.findFirst({
+        where: and(...conditions),
+    })
+    return !!existing
+}
+
 export async function createOrder(data: { code: string, supplierId: string, totalValue: string, observations?: string, initialStatus?: "CREATED" | "SENT" | "PENDING_ISSUE" | "FEEDING", expectedArrivalDate?: Date, requestedBy?: string }) {
+    // Check for duplicate order code
+    const isDuplicate = await checkDuplicateOrderCode(data.code)
+    if (isDuplicate) {
+        throw new Error("DUPLICATE_ORDER_CODE")
+    }
+
     const status = data.initialStatus || 'CREATED'
     // 1. Create Order
     const [newOrder] = await db.insert(orders).values({
@@ -328,6 +345,112 @@ export async function updateOrderValue(id: number, newValue: string) {
 
     revalidatePath(`/orders/${id}`)
     revalidatePath("/orders")
+}
+
+const statusLabelMap: Record<string, string> = {
+    FEEDING: 'Alimentando',
+    CREATED: 'Aguardando Envio',
+    SENT: 'Enviado ao Fornecedor',
+    APPROVED: 'Orçamento Aprovado',
+    MIRROR_ARRIVED: 'Espelho Chegou',
+    WAITING_ARRIVAL: 'Aguardando Chegada',
+    RECEIVED_COMPLETE: 'Recebido Completo',
+    RECEIVED_PARTIAL: 'Recebido com Saldo',
+    PENDING_ISSUE: 'Pendência',
+    CANCELLED: 'Cancelado',
+}
+
+export async function updateOrder(id: number, data: {
+    code?: string,
+    supplierId?: number,
+    totalValue?: string,
+    status?: string,
+    observations?: string,
+    expectedArrivalDate?: Date | null,
+    requestedBy?: string,
+}) {
+    const currentOrder = await db.query.orders.findFirst({
+        where: eq(orders.id, id),
+        with: { supplier: true },
+    })
+
+    if (!currentOrder) throw new Error("Order not found")
+
+    // Check for duplicate code if code is being changed
+    if (data.code && data.code !== currentOrder.code) {
+        const isDuplicate = await checkDuplicateOrderCode(data.code, id)
+        if (isDuplicate) {
+            throw new Error("DUPLICATE_ORDER_CODE")
+        }
+    }
+
+    // Build the update object only with changed fields
+    const updateData: any = { lastUpdate: new Date() }
+    const changes: string[] = []
+
+    if (data.code !== undefined && data.code !== currentOrder.code) {
+        updateData.code = data.code
+        changes.push(`Código: ${currentOrder.code} → ${data.code}`)
+    }
+    if (data.supplierId !== undefined && data.supplierId !== currentOrder.supplierId) {
+        updateData.supplierId = data.supplierId
+        changes.push(`Fornecedor alterado`)
+    }
+    if (data.totalValue !== undefined && data.totalValue !== currentOrder.totalValue) {
+        updateData.totalValue = data.totalValue
+        changes.push(`Valor: R$ ${currentOrder.totalValue || '0.00'} → R$ ${data.totalValue}`)
+    }
+    if (data.status !== undefined && data.status !== currentOrder.status) {
+        updateData.status = data.status
+        changes.push(`Status: ${statusLabelMap[currentOrder.status] || currentOrder.status} → ${statusLabelMap[data.status] || data.status}`)
+    }
+    if (data.observations !== undefined && data.observations !== (currentOrder.observations || '')) {
+        updateData.observations = data.observations
+        changes.push(`Observações atualizadas`)
+    }
+    if (data.expectedArrivalDate !== undefined) {
+        updateData.expectedArrivalDate = data.expectedArrivalDate
+        const oldDate = currentOrder.expectedArrivalDate
+            ? currentOrder.expectedArrivalDate.toLocaleDateString('pt-BR')
+            : '(sem data)'
+        const newDate = data.expectedArrivalDate
+            ? data.expectedArrivalDate.toLocaleDateString('pt-BR')
+            : '(sem data)'
+        if (oldDate !== newDate) {
+            changes.push(`Data prevista: ${oldDate} → ${newDate}`)
+        }
+    }
+    if (data.requestedBy !== undefined && data.requestedBy !== (currentOrder.requestedBy || '')) {
+        updateData.requestedBy = data.requestedBy
+        changes.push(`Solicitante: ${currentOrder.requestedBy || '(vazio)'} → ${data.requestedBy}`)
+    }
+
+    if (changes.length === 0) return currentOrder
+
+    await db.update(orders)
+        .set(updateData)
+        .where(eq(orders.id, id))
+
+    // Add History
+    await db.insert(orderHistory).values({
+        orderId: id,
+        previousStatus: currentOrder.status,
+        newStatus: (data.status || currentOrder.status) as any,
+        notes: `Pedido editado: ${changes.join('; ')}`,
+    })
+
+    revalidatePath(`/orders/${id}`)
+    revalidatePath("/orders")
+    revalidatePath("/feeding-orders")
+    revalidatePath("/waiting-shipment")
+    revalidatePath("/waiting-mirror")
+    revalidatePath("/arriving-today")
+    revalidatePath("/received-orders")
+    revalidatePath("/pending-balance")
+    revalidatePath("/overdue-orders")
+    revalidatePath("/pendencies")
+    revalidatePath("/")
+    revalidatePath("/", "layout")
 }
 
 export async function updateOrderExpectedDate(id: number, newDate: Date) {

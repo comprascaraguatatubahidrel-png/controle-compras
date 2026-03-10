@@ -1,4 +1,5 @@
 import { OrderValueEdit } from "@/components/orders/OrderValueEdit"
+import { OrderEditModal } from "@/components/orders/OrderEditModal"
 import { ArrowLeft, Calendar, FileText, Truck, User, AlertTriangle, MessageCircle } from "lucide-react"
 import { OrderPrintButton } from "@/components/orders/OrderPrintButton"
 import { OrderRequestedByEdit } from "@/components/orders/OrderRequestedByEdit"
@@ -93,6 +94,17 @@ export default async function OrderDetailsPage({ params, searchParams }: { param
                     {order.status !== 'CANCELLED' && (
                         <OrderCancelButton orderId={order.id} />
                     )}
+
+                    <OrderEditModal order={{
+                        id: order.id,
+                        code: order.code,
+                        supplierId: order.supplierId,
+                        totalValue: order.totalValue,
+                        status: order.status,
+                        observations: order.observations,
+                        expectedArrivalDate: order.expectedArrivalDate,
+                        requestedBy: order.requestedBy,
+                    }} />
 
                     <OrderPrintButton />
 
