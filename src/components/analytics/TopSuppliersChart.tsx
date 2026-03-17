@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, LabelList } from "recharts"
 
 interface TopSuppliersChartProps {
     data: {
@@ -23,7 +23,7 @@ export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
             </CardHeader>
             <CardContent>
                 <ResponsiveContainer width="100%" height={500}>
-                    <BarChart layout="vertical" data={data} margin={{ top: 0, right: 0, bottom: 0, left: 40 }}>
+                    <BarChart layout="vertical" data={data} margin={{ top: 0, right: 50, bottom: 0, left: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted))" />
                         <XAxis type="number" hide />
                         <YAxis
@@ -51,6 +51,13 @@ export function TopSuppliersChart({ data }: TopSuppliersChartProps) {
                             {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
+                            <LabelList
+                                dataKey="value"
+                                position="right"
+                                fill="hsl(var(--foreground))"
+                                fontSize={11}
+                                formatter={(value: any) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(Number(value))}
+                            />
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>

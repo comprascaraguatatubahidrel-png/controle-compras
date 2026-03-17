@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, LabelList } from "recharts"
 
 interface TopRequestorsChartProps {
     data: {
@@ -23,7 +23,7 @@ export function TopRequestorsChart({ data }: TopRequestorsChartProps) {
             </CardHeader>
             <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
-                    <BarChart layout="vertical" data={data} margin={{ top: 0, right: 0, bottom: 0, left: 40 }}>
+                    <BarChart layout="vertical" data={data} margin={{ top: 0, right: 30, bottom: 0, left: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted))" />
                         <XAxis type="number" hide />
                         <YAxis
@@ -51,6 +51,12 @@ export function TopRequestorsChart({ data }: TopRequestorsChartProps) {
                             {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
+                            <LabelList
+                                dataKey="value"
+                                position="right"
+                                fill="hsl(var(--foreground))"
+                                fontSize={11}
+                            />
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>

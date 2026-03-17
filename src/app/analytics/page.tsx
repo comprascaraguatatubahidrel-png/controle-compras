@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, ShoppingCart, TrendingUp, Calendar } from "lucide-react"
+import { DollarSign, ShoppingCart, TrendingUp, Calendar, AlertTriangle, Wallet } from "lucide-react"
 import { db } from "@/db"
 import { orders } from "@/db/schema"
 import { not, eq, desc } from "drizzle-orm"
@@ -27,6 +27,24 @@ export default async function AnalyticsPage() {
     const totalSpent = allOrders.reduce((sum, order) => sum + Number(order.totalValue || 0), 0)
     const totalOrders = allOrders.length
     const averageTicket = totalOrders > 0 ? totalSpent / totalOrders : 0
+
+    // NEW KPIs
+    const todayKPI = new Date()
+    todayKPI.setHours(0, 0, 0, 0)
+
+    const overdueOrdersCount = allOrders.filter(order => {
+        if (!order.expectedArrivalDate) return false;
+        if (order.status === 'RECEIVED_COMPLETE' || order.status === 'CANCELLED') return false;
+        
+        const expectedDate = new Date(order.expectedArrivalDate);
+        expectedDate.setHours(0, 0, 0, 0);
+        return expectedDate < todayKPI;
+    }).length
+
+    const pendingBalance = allOrders.reduce((sum, order) => {
+        if (order.status === 'RECEIVED_COMPLETE' || order.status === 'CANCELLED') return sum;
+        return sum + Number(order.remainingValue || order.totalValue || 0);
+    }, 0)
 
     // 3. Prepare Chart Data
 
@@ -154,7 +172,7 @@ export default async function AnalyticsPage() {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-5">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Comprado</CardTitle>
@@ -192,6 +210,32 @@ export default async function AnalyticsPage() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Média de valor por pedido
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Pedidos em Atraso</CardTitle>
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-red-500">{overdueOrdersCount}</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Aguardando chegada
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Saldo Pendente</CardTitle>
+                        <Wallet className="h-4 w-4 text-amber-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-amber-500">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(pendingBalance)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Valor a receber
                         </p>
                     </CardContent>
                 </Card>
