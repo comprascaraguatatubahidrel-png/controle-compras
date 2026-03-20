@@ -28,11 +28,15 @@ export function DeleteSupplierButton({ supplierId, supplierName }: DeleteSupplie
     const handleDelete = async () => {
         setIsDeleting(true)
         try {
-            await deleteSupplier(supplierId)
-            toast.success("Fornecedor excluído com sucesso")
+            const result = await deleteSupplier(supplierId)
+            if (result.success) {
+                toast.success("Fornecedor excluído com sucesso")
+            } else {
+                toast.error(result.error || "Erro ao excluir fornecedor")
+            }
         } catch (error) {
             console.error("Erro ao excluir fornecedor:", error)
-            toast.error(error instanceof Error ? error.message : "Erro ao excluir fornecedor")
+            toast.error("Erro ao excluir fornecedor")
         } finally {
             setIsDeleting(false)
         }

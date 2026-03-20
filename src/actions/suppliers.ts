@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from "@/db"
-import { suppliers, representatives } from "@/db/schema"
+import { suppliers, representatives, refusedInvoices } from "@/db/schema"
 import { revalidatePath } from "next/cache"
 import { desc, asc, eq, ilike } from "drizzle-orm"
 
@@ -60,19 +60,29 @@ export async function updateSupplier(id: number, data: { name: string, brand?: s
     revalidatePath("/orders/new")
 }
 
-export async function deleteSupplier(id: number) {
-    // Check if has orders
-    const supplier = await getSupplierById(id)
-    if (supplier && supplier.orders.length > 0) {
-        throw new Error("Não é possível excluir fornecedor com pedidos vinculados.")
+export async function deleteSupplier(id: number): Promise<{ success: boolean; error?: string }> {
+    try {
+        // Check if has orders
+        const supplier = await getSupplierById(id)
+        if (supplier && supplier.orders.length > 0) {
+            return { success: false, error: "Não é possível excluir fornecedor com pedidos vinculados." }
+        }
+
+        // Explicitly delete representatives to avoid foreign key violation
+        await db.delete(representatives).where(eq(representatives.supplierId, id))
+
+        // Delete refused invoices linked to this supplier
+        await db.delete(refusedInvoices).where(eq(refusedInvoices.supplierId, id))
+
+        // Now delete the supplier
+        await db.delete(suppliers).where(eq(suppliers.id, id))
+
+        revalidatePath("/suppliers")
+        revalidatePath("/orders/new")
+
+        return { success: true }
+    } catch (error) {
+        console.error("Erro ao excluir fornecedor:", error)
+        return { success: false, error: "Erro ao excluir fornecedor. Tente novamente." }
     }
-
-    // Explicitly delete representatives to avoid foreign key violation
-    await db.delete(representatives).where(eq(representatives.supplierId, id))
-
-    // Now delete the supplier
-    await db.delete(suppliers).where(eq(suppliers.id, id))
-
-    revalidatePath("/suppliers")
-    revalidatePath("/orders/new")
 }
