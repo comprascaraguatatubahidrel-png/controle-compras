@@ -1,9 +1,9 @@
 'use server'
 
 import { db } from "@/db"
-import { suppliers, representatives, refusedInvoices } from "@/db/schema"
+import { suppliers, representatives, refusedInvoices, orders, orderHistory, partialReceipts } from "@/db/schema"
 import { revalidatePath } from "next/cache"
-import { desc, asc, eq, ilike } from "drizzle-orm"
+import { desc, asc, eq, ilike, inArray } from "drizzle-orm"
 
 export async function getSuppliers(search?: string) {
     const whereClause = search ? ilike(suppliers.name, `%${search}%`) : undefined
@@ -62,16 +62,27 @@ export async function updateSupplier(id: number, data: { name: string, brand?: s
 
 export async function deleteSupplier(id: number): Promise<{ success: boolean; error?: string }> {
     try {
-        // Check if has orders
+        // Get supplier with orders to find order IDs
         const supplier = await getSupplierById(id)
+
+        // Delete order-related data if supplier has orders
         if (supplier && supplier.orders.length > 0) {
-            return { success: false, error: "Não é possível excluir fornecedor com pedidos vinculados." }
+            const orderIds = supplier.orders.map(o => o.id)
+
+            // Delete order history for all orders of this supplier
+            await db.delete(orderHistory).where(inArray(orderHistory.orderId, orderIds))
+
+            // Delete partial receipts for all orders of this supplier
+            await db.delete(partialReceipts).where(inArray(partialReceipts.orderId, orderIds))
+
+            // Delete all orders of this supplier
+            await db.delete(orders).where(eq(orders.supplierId, id))
         }
 
-        // Explicitly delete representatives to avoid foreign key violation
+        // Delete representatives
         await db.delete(representatives).where(eq(representatives.supplierId, id))
 
-        // Delete refused invoices linked to this supplier
+        // Delete refused invoices
         await db.delete(refusedInvoices).where(eq(refusedInvoices.supplierId, id))
 
         // Now delete the supplier
@@ -79,6 +90,8 @@ export async function deleteSupplier(id: number): Promise<{ success: boolean; er
 
         revalidatePath("/suppliers")
         revalidatePath("/orders/new")
+        revalidatePath("/orders")
+        revalidatePath("/")
 
         return { success: true }
     } catch (error) {

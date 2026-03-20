@@ -54,7 +54,7 @@ export function DeleteSupplierButton({ supplierId, supplierName }: DeleteSupplie
                 <AlertDialogHeader>
                     <AlertDialogTitle>Excluir Fornecedor</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Tem certeza que deseja excluir o fornecedor <strong>{supplierName}</strong>? Esta ação não pode ser desfeita. Representantes vinculados a este fornecedor também serão excluídos.
+                        Tem certeza que deseja excluir o fornecedor <strong>{supplierName}</strong>? Esta ação não pode ser desfeita. Todos os pedidos, representantes, notas recusadas e histórico vinculados a este fornecedor também serão excluídos.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
